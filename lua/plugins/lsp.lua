@@ -70,9 +70,21 @@ return {
 
   { "mfussenegger/nvim-lint", event = "BufReadPost",
     config = function()
-      require("lint").linters_by_ft = { javascript = { "eslint_d" },
-        typescript = { "eslint_d" }, dockerfile = { "hadolint" } }
+      local lint = require("lint")
+      -- JS/TS linting is handled by the eslint LSP; nvim-lint only covers extras
+      -- (e.g. hadolint for Dockerfiles). Keeping eslint_d here would double-lint.
+      lint.linters_by_ft = { dockerfile = { "hadolint" } }
       vim.api.nvim_create_autocmd({ "BufWritePost", "BufReadPost" }, {
-        callback = function() require("lint").try_lint() end })
+        callback = function()
+          -- Only run linters whose executable is actually installed (avoid ENOENT)
+          local run = {}
+          for _, name in ipairs(lint.linters_by_ft[vim.bo.filetype] or {}) do
+            local l = lint.linters[name]
+            local cmd = type(l) == "function" and l().cmd or (type(l) == "table" and l.cmd)
+            if cmd and vim.fn.executable(cmd) == 1 then run[#run + 1] = name end
+          end
+          if #run > 0 then lint.try_lint(run) end
+        end,
+      })
     end },
 }
