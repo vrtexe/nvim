@@ -4,6 +4,9 @@ return {
     keys = {
       { "<leader>ff", "<cmd>Telescope find_files<cr>", desc = "Find files" },
       { "<leader><leader>", "<cmd>Telescope find_files<cr>", desc = "Search everywhere" },
+      -- Cmd+Shift+N (only reaches nvim if Ghostty forwards Cmd; see docs/ghostty-keybinds.md)
+      { "<D-N>", "<cmd>Telescope find_files<cr>", desc = "Find files (Cmd+Shift+N)" },
+      { "<D-n>", "<cmd>Telescope find_files<cr>", desc = "Find files (Cmd+Shift+N)" },
       { "<leader>fg", "<cmd>Telescope live_grep<cr>", desc = "Grep" },
       { "<leader>fr", "<cmd>Telescope oldfiles<cr>", desc = "Recent files" },
     },
