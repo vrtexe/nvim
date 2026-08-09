@@ -1,0 +1,7 @@
+# Neovim runtime state we don't version
+plugin/
+.luarc.json
+*.log
+# SDD scratch (ledger, briefs, review packages)
+.superpowers/
+# Keep lazy-lock.json tracked (reproducibility); ignore everything else transient
