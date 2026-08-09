@@ -1,28 +1,62 @@
-# Ghostty Keybindings for Neovim
+# Ghostty ↔ Neovim key forwarding
 
-This document provides a snippet for configuring Ghostty to forward Cmd key combinations to Neovim, enabling IDE-like keybindings in the terminal.
+Terminal apps receive *bytes*, not key events. macOS + the terminal swallow `Cmd`
+before nvim sees it, so `Cmd`-based shortcuts only reach nvim if Ghostty is told
+to forward them. This file is that config. **Everything here is optional** — every
+Cmd shortcut has a `<leader>`/Ctrl fallback that works with zero setup (see bottom).
 
-## Ghostty Configuration
+Add the following to `~/.config/ghostty/config`, then fully quit & reopen Ghostty
+(or reload the config).
 
-Add the following lines to `~/.config/ghostty/config`:
+## 1. Option key → Alt (needed for Alt+Enter, Alt+F7, Alt+↑/↓)
 
 ```
 macos-option-as-alt = true
-keybind = cmd+shift+n=text:\x1b[110;9u
-keybind = cmd+e=text:\x1b[101;9u
 ```
 
-## Neovim Keymaps
+This makes `Option` send `Alt` (`<M-...>`), so the IntelliJ-style `Alt+Enter`
+(code action), `Alt+F7` (find references), and `Alt+↑/↓` (move line) reach nvim.
 
-The corresponding Neovim keymaps are configured to decode the CSI-u sequences that Ghostty forwards for Cmd combinations. These maps should be added to `lua/core/keymaps.lua` behind `if not vim.g.vscode` or in a terminal-only configuration file:
+## 2. Forward specific Cmd chords (CSI-u sequences nvim decodes to `<D-...>`)
 
-```lua
--- decode the CSI-u sequences Ghostty forwards for Cmd combos
-vim.keymap.set("n", "<C-S-n>", "<cmd>Telescope find_files<cr>", { desc = "File lookup (Cmd+Shift+N)" })
-vim.keymap.set("n", "<C-e>", "<cmd>Telescope find_files<cr>", { desc = "File lookup (Cmd+E)" })
+Neovim 0.12 speaks the kitty keyboard protocol, so a CSI-u byte sequence carrying
+the `super` (Cmd) modifier decodes to a `<D-...>` mapping. These lines make Ghostty
+emit those sequences:
+
+```
+# Cmd+Shift+N  -> <D-N>  -> Telescope find_files
+keybind = cmd+shift+n=text:\x1b[110;10u
+
+# Cmd+/        -> <D-/>  -> toggle comment
+keybind = cmd+slash=text:\x1b[47;9u
 ```
 
-## Important Notes
+Byte format is `ESC [ <keycode> ; <modifier> u`, where modifier = `1 + shift(1) +
+alt(2) + ctrl(4) + super/Cmd(8)`. So Cmd+/ = `1+8 = 9`; Cmd+Shift+N = `1+1+8 = 10`.
+The nvim side is already wired: `<D-N>`/`<D-n>` in `lua/plugins/navigation.lua`,
+`<D-/>` in `lua/core/keymaps.lua`.
 
-- **Escape Mapping Variation**: The exact escape sequence (`\x1b[110;9u` for Cmd+Shift+N) depends on your Ghostty version. If the keybinding doesn't work as expected, check your Ghostty version documentation or test with alternatives.
-- **Fallback**: If terminal-based Cmd forwarding doesn't work reliably, the `<leader>ff` (fzf.lua or Telescope fallback) keybinding always works within Neovim regardless of terminal configuration.
+> If a chord doesn't trigger after reload, your Ghostty/nvim build may decode the
+> modifier slightly differently — press it and check `:messages`, then adjust the
+> keycode/modifier, or just use the fallback below. The fallbacks always work.
+
+## 3. Add more Cmd chords (optional, same pattern)
+
+Pick the keycode (lowercase unicode codepoint) and modifier, add a `keybind`, and
+add the matching `<D-...>` map in nvim. Example:
+
+```
+# Cmd+P -> file lookup (keycode 'p'=112, Cmd=9)
+keybind = cmd+p=text:\x1b[112;9u        # then map <D-p> in navigation.lua
+```
+
+## Fallbacks that always work (no Ghostty config)
+
+| Action | Cmd shortcut (needs forwarding) | Always-works fallback |
+|---|---|---|
+| Find files | `Cmd+Shift+N` | `<Space>ff` (or `<Space><Space>`) |
+| Toggle comment | `Cmd+/` | `Ctrl+/` (`<C-_>`) — works in Ghostty now |
+| Code action | `Alt+Enter` | `gr`-family / which-key |
+| Find references | `Alt+F7` | `gr` |
+
+`which-key` (press `<Space>` and pause) lists every leader binding live.
