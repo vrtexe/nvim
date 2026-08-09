@@ -6,4 +6,6 @@ return {
     dependencies = { "nvim-lua/plenary.nvim" }, opts = {} },
   -- Animated smooth scrolling for <C-d>/<C-u>/<C-f>/<C-b>/zz/gg/G etc.
   { "karb94/neoscroll.nvim", event = "VeryLazy", opts = { easing = "sine" } },
+  -- Animated cursor trail (the caret glides between positions)
+  { "sphamba/smear-cursor.nvim", event = "VeryLazy", opts = {} },
 }
