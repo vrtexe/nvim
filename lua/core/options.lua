@@ -20,6 +20,7 @@ o.undofile = true
 o.splitright = true
 o.splitbelow = true
 o.scrolloff = 6
+o.smoothscroll = true              -- smooth scroll over wrapped lines (native 0.10+)
 o.updatetime = 250
 o.timeoutlen = 400                 -- which-key popup delay
 
