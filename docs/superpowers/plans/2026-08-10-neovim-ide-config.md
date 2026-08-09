@@ -392,6 +392,7 @@ git add -A && git commit -m "feat(ui): lualine, bufferline tabs, which-key, brea
 ```lua
 return {
   { "nvim-treesitter/nvim-treesitter", build = ":TSUpdate",
+    branch = "master",  -- classic API; `main` branch is the incompatible rewrite
     main = "nvim-treesitter.configs",
     opts = {
       ensure_installed = { "lua", "vim", "vimdoc", "bash", "json", "yaml",

@@ -5,10 +5,14 @@ cd "$(dirname "$0")/.."
 LAZY="$HOME/.local/share/nvim/lazy"
 fail=0
 
-echo "== 1. Full terminal config load (no Lua errors) =="
-if nvim --headless "+qa" 2>&1 | grep -iE "E5108|stack traceback|Error detected"; then
-  echo "FAIL: load errors above"; fail=1
-else echo "LOAD-OK"; fi
+echo "== 1. Full terminal config load — inspect every plugin's error state =="
+# Note: lazy swallows plugin `config` errors into p._.error (NOT stderr), so a raw
+# stderr grep gives false passes. Inspect lazy's own per-plugin error field instead.
+res=$(nvim --headless \
+  "+lua local bad=false; for _,p in pairs(require('lazy.core.config').plugins) do if p._.error then bad=true; io.stdout:write('PLUGIN-ERROR '..p.name..': '..tostring(p._.error)..'\n') end end; io.stdout:write(bad and 'HAS-ERRORS\n' or 'ALL-PLUGINS-CLEAN\n')" \
+  "+qa" 2>&1)
+echo "$res" | grep -E "PLUGIN-ERROR" || true
+if echo "$res" | grep -q "ALL-PLUGINS-CLEAN"; then echo "LOAD-OK"; else echo "FAIL: plugin errors above"; fail=1; fi
 
 echo "== 2. Plugin install completeness (no incomplete clones) =="
 remnants=$(ls "$LAZY" 2>/dev/null | grep -E '\.(cloning|updating)$' || true)

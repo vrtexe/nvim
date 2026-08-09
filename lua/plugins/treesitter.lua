@@ -1,5 +1,6 @@
 return {
   { "nvim-treesitter/nvim-treesitter", build = ":TSUpdate",
+    branch = "master",  -- classic API (nvim-treesitter.configs); `main` branch is the incompatible rewrite
     main = "nvim-treesitter.configs",
     opts = {
       ensure_installed = { "lua", "vim", "vimdoc", "bash", "json", "yaml",
