@@ -402,7 +402,7 @@ return {
       indent = { enable = true },
     } },
   { "HiPhish/rainbow-delimiters.nvim", event = "BufReadPost" },
-  { "lukas-krecan/indent-blankline.nvim", name = "ibl", main = "ibl",
+  { "lukas-reineke/indent-blankline.nvim", name = "ibl", main = "ibl",
     event = "BufReadPost", opts = {} },
   { "RRethy/vim-illuminate", event = "BufReadPost" },
 }
