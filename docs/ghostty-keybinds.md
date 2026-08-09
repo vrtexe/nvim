@@ -24,17 +24,19 @@ the `super` (Cmd) modifier decodes to a `<D-...>` mapping. These lines make Ghos
 emit those sequences:
 
 ```
-# Cmd+Shift+N  -> <D-N>  -> Telescope find_files
-keybind = cmd+shift+n=text:\x1b[110;10u
+# Cmd+Shift+N  -> ESC[110;10u -> <D-N> -> Telescope find_files
+keybind = cmd+shift+n=csi:110;10u
 
-# Cmd+/        -> <D-/>  -> toggle comment
-keybind = cmd+slash=text:\x1b[47;9u
+# Cmd+/        -> ESC[47;9u   -> <D-/> -> toggle comment
+keybind = cmd+slash=csi:47;9u
 ```
 
-Byte format is `ESC [ <keycode> ; <modifier> u`, where modifier = `1 + shift(1) +
-alt(2) + ctrl(4) + super/Cmd(8)`. So Cmd+/ = `1+8 = 9`; Cmd+Shift+N = `1+1+8 = 10`.
-The nvim side is already wired: `<D-N>`/`<D-n>` in `lua/plugins/navigation.lua`,
-`<D-/>` in `lua/core/keymaps.lua`.
+`csi:X` makes Ghostty emit `ESC [ X`. The CSI-u form is `<keycode> ; <modifier> u`,
+where modifier = `1 + shift(1) + alt(2) + ctrl(4) + super/Cmd(8)`. So Cmd+/ =
+`1+8 = 9`; Cmd+Shift+N = `1+1+8 = 10`. (Ghostty normalizes `cmd` to `super`
+internally — both spellings validate.) The nvim side is already wired:
+`<D-N>`/`<D-n>` in `lua/plugins/navigation.lua`, `<D-/>` in `lua/core/keymaps.lua`.
+Validate any config change with `ghostty +show-config`.
 
 > If a chord doesn't trigger after reload, your Ghostty/nvim build may decode the
 > modifier slightly differently — press it and check `:messages`, then adjust the
@@ -46,9 +48,10 @@ Pick the keycode (lowercase unicode codepoint) and modifier, add a `keybind`, an
 add the matching `<D-...>` map in nvim. Example:
 
 ```
-# Cmd+P -> file lookup (keycode 'p'=112, Cmd=9)
-keybind = cmd+p=text:\x1b[112;9u        # then map <D-p> in navigation.lua
+# Cmd+P -> file lookup (keycode 'p'=112, Cmd=9); then map <D-p> in navigation.lua
+keybind = cmd+p=csi:112;9u
 ```
+(Keep comments on their own line — Ghostty reads everything after `=` as the value.)
 
 ## Fallbacks that always work (no Ghostty config)
 
