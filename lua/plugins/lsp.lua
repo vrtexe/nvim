@@ -15,7 +15,13 @@ return {
         "cssls", "jsonls", "eslint", "gopls", "clangd",
         "kotlin_language_server", "dockerls", "sqls" }
       require("mason").setup()
-      require("mason-lspconfig").setup({ ensure_installed = servers })
+      -- automatic_enable enables ONLY installed servers (and enables each as its
+      -- install completes). Do NOT manually vim.lsp.enable() the whole list —
+      -- that force-spawns servers mason hasn't installed yet ("failed to spawn").
+      require("mason-lspconfig").setup({
+        ensure_installed = servers,
+        automatic_enable = true,
+      })
 
       local caps = require("blink.cmp").get_lsp_capabilities()
       vim.lsp.config("*", { capabilities = caps })
@@ -44,8 +50,6 @@ return {
           end, "Organize imports")
         end,
       })
-
-      for _, s in ipairs(servers) do vim.lsp.enable(s) end
     end,
   },
 
