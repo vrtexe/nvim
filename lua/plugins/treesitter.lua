@@ -8,7 +8,10 @@ return {
         "svelte", "sql", "dockerfile", "go", "gomod", "rust", "c", "cpp",
         "java", "kotlin" },
       highlight = { enable = true },
-      indent = { enable = true },
+      -- treesitter's indent module (master branch) is unreliable — it sets an
+      -- indentexpr that returns no indentation. Leave it OFF so Neovim's built-in
+      -- per-filetype indenters (filetype indent on) provide indentexpr instead.
+      indent = { enable = false },
     } },
   -- Auto-close and auto-rename HTML/JSX/TSX/Svelte/Vue tags
   { "windwp/nvim-ts-autotag", event = "InsertEnter", opts = {} },

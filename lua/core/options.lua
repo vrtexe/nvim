@@ -10,8 +10,8 @@ o.expandtab = true
 o.shiftwidth = 2
 o.tabstop = 2
 o.softtabstop = 2
-o.autoindent = true                -- keep the current line's indent on <CR>
-o.smartindent = true               -- add a level after `{`, etc.
+o.autoindent = true                -- fallback: keep indent for filetypes w/o indentexpr
+-- No smartindent: it fights the real per-filetype `indentexpr` (over-indents).
 o.wrap = false
 o.signcolumn = "yes"               -- stable gutter for diagnostics/git
 o.termguicolors = true
