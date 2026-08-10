@@ -26,13 +26,29 @@ return {
       local caps = require("blink.cmp").get_lsp_capabilities()
       vim.lsp.config("*", { capabilities = caps })
 
+      -- Svelte cross-file auto-import: teach ts_ls about .svelte via the TS Svelte
+      -- plugin (bundled with the svelte-language-server mason package) and let
+      -- ts_ls attach to .svelte buffers too, so component imports are suggested.
+      local svelte_ts_plugin = vim.fn.stdpath("data")
+        .. "/mason/packages/svelte-language-server/node_modules/typescript-svelte-plugin"
+      if vim.uv.fs_stat(svelte_ts_plugin) then
+        vim.lsp.config("ts_ls", {
+          filetypes = { "javascript", "javascriptreact", "javascript.jsx",
+            "typescript", "typescriptreact", "typescript.tsx", "svelte" },
+          init_options = {
+            plugins = {
+              { name = "typescript-svelte-plugin", location = svelte_ts_plugin,
+                languages = { "svelte" } },
+            },
+          },
+        })
+      end
+
       vim.api.nvim_create_autocmd("LspAttach", {
         callback = function(ev)
           local b = ev.buf
-          local client = vim.lsp.get_client_by_id(ev.data.client_id)
-          if client and client.server_capabilities.documentSymbolProvider then
-            require("nvim-navic").attach(client, b)
-          end
+          -- Breadcrumbs (navic) are attached by barbecue (attach_navic=true).
+          -- Attaching here too warns when a 2nd client (e.g. svelte + ts_ls) attaches.
           local function m(lhs, rhs, desc)
             vim.keymap.set("n", lhs, rhs, { buffer = b, desc = desc })
           end
