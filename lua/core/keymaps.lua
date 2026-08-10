@@ -23,6 +23,17 @@ if not vim.g.vscode then
     map("x", lhs, "gc", { remap = true, desc = "Toggle comment" })
   end
 
+  -- Direct pane navigation (no <C-w> prefix) — the standard, seamless way.
+  map("n", "<C-h>", "<C-w>h", { desc = "Go to left pane" })
+  map("n", "<C-j>", "<C-w>j", { desc = "Go to lower pane" })
+  map("n", "<C-k>", "<C-w>k", { desc = "Go to upper pane" })
+  map("n", "<C-l>", "<C-w>l", { desc = "Go to right pane" })
+  -- Same from inside a terminal: exit terminal-mode, then move
+  map("t", "<C-h>", "<C-\\><C-n><C-w>h", { desc = "Go to left pane" })
+  map("t", "<C-j>", "<C-\\><C-n><C-w>j", { desc = "Go to lower pane" })
+  map("t", "<C-k>", "<C-\\><C-n><C-w>k", { desc = "Go to upper pane" })
+  map("t", "<C-l>", "<C-\\><C-n><C-w>l", { desc = "Go to right pane" })
+
   -- Window/split layout under <leader>w (friendlier than the <C-w> prefix;
   -- shown grouped in which-key). The <C-w> defaults keep working too.
   map("n", "<leader>wv", "<C-w>v", { desc = "Split vertical" })
