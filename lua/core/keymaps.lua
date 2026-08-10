@@ -22,4 +22,20 @@ if not vim.g.vscode then
     map("n", lhs, "gcc", { remap = true, desc = "Toggle comment" })
     map("x", lhs, "gc", { remap = true, desc = "Toggle comment" })
   end
+
+  -- Window/split layout under <leader>w (friendlier than the <C-w> prefix;
+  -- shown grouped in which-key). The <C-w> defaults keep working too.
+  map("n", "<leader>wv", "<C-w>v", { desc = "Split vertical" })
+  map("n", "<leader>ws", "<C-w>s", { desc = "Split horizontal" })
+  map("n", "<leader>wh", "<C-w>h", { desc = "Go to left window" })
+  map("n", "<leader>wj", "<C-w>j", { desc = "Go to lower window" })
+  map("n", "<leader>wk", "<C-w>k", { desc = "Go to upper window" })
+  map("n", "<leader>wl", "<C-w>l", { desc = "Go to right window" })
+  map("n", "<leader>wc", "<C-w>c", { desc = "Close window" })
+  map("n", "<leader>wo", "<C-w>o", { desc = "Only (close others)" })
+  map("n", "<leader>w=", "<C-w>=", { desc = "Equalize windows" })
+  -- Editor groups = tab pages: create / next / prev / close
+  map("n", "<leader>wt", "<cmd>tabnew<cr>", { desc = "New editor group (tab page)" })
+  map("n", "<leader>wn", "gt", { remap = true, desc = "Next group" })
+  map("n", "<leader>wp", "gT", { remap = true, desc = "Prev group" })
 end
