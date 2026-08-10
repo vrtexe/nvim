@@ -13,7 +13,7 @@ return {
     config = function()
       local servers = { "lua_ls", "ts_ls", "svelte", "tailwindcss", "html",
         "cssls", "jsonls", "eslint", "gopls", "clangd",
-        "kotlin_language_server", "dockerls", "sqls" }
+        "kotlin_language_server", "dockerls", "sqls", "bashls" }
       require("mason").setup()
       -- automatic_enable enables ONLY installed servers (and enables each as its
       -- install completes). Do NOT manually vim.lsp.enable() the whole list —
