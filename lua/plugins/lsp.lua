@@ -77,8 +77,9 @@ return {
           m("gd", vim.lsp.buf.definition, "Go to definition")
           m("<F4>", vim.lsp.buf.definition, "Go to definition")
           m("gi", vim.lsp.buf.implementation, "Go to implementation")
-          m("gr", vim.lsp.buf.references, "Find references")
-          m("<A-F7>", vim.lsp.buf.references, "Find references")
+          -- Peek panel (glance.nvim) instead of the quickfix dump. gd stays a jump.
+          m("gr", "<cmd>Glance references<cr>", "Find references (peek)")
+          m("<A-F7>", "<cmd>Glance references<cr>", "Find references (peek)")
           m("K", vim.lsp.buf.hover, "Hover docs")
           m("<S-F6>", vim.lsp.buf.rename, "Rename")
           m("<A-CR>", vim.lsp.buf.code_action, "Code action")

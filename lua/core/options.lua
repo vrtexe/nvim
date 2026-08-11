@@ -14,6 +14,11 @@ o.autoindent = true -- fallback: keep indent for filetypes w/o indentexpr
 -- No smartindent: it fights the real per-filetype `indentexpr` (over-indents).
 o.wrap = false
 o.signcolumn = "yes" -- stable gutter for diagnostics/git
+-- Folding (nvim-ufo): open files fully unfolded; ufo supplies fold text/handling.
+o.foldcolumn = "0" -- no fold-column gutter (set "1" to show fold markers)
+o.foldlevel = 99
+o.foldlevelstart = 99
+o.foldenable = true
 o.termguicolors = true
 o.ignorecase = true
 o.smartcase = true
