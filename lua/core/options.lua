@@ -28,7 +28,15 @@ o.timeoutlen = 400 -- which-key popup delay
 -- Inline diagnostics: gutter signs + end-of-line virtual text (REQUIRED)
 vim.diagnostic.config({
   virtual_text = { prefix = "●", spacing = 2 },
-  signs = true,
+  -- Nerd Font glyphs in the gutter (needs a Nerd Font in the terminal — you have one).
+  signs = {
+    text = {
+      [vim.diagnostic.severity.ERROR] = "",
+      [vim.diagnostic.severity.WARN] = "",
+      [vim.diagnostic.severity.INFO] = "",
+      [vim.diagnostic.severity.HINT] = "",
+    },
+  },
   underline = true,
   update_in_insert = false,
   severity_sort = true,

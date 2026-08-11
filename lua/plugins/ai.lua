@@ -34,7 +34,7 @@ return {
     },
     opts = {
       terminal = {
-        provider = "native", -- no snacks.nvim installed; native split works fully
+        provider = "auto", -- picks snacks.terminal (installed) for a nicer window
         split_side = "right",
         split_width_percentage = 0.35,
       },

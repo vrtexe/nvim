@@ -1,6 +1,9 @@
 return {
   {
     "nvim-telescope/telescope.nvim",
+    -- Disabled in favour of snacks.picker (see lua/plugins/snacks.lua) which now owns
+    -- <leader>ff / fg / fr / <leader><leader> / <D-N>. Flip back to true to restore Telescope.
+    enabled = false,
     cmd = "Telescope",
     dependencies = { "nvim-lua/plenary.nvim" },
     keys = {
