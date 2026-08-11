@@ -1,5 +1,6 @@
 return {
-  { "mfussenegger/nvim-dap",
+  {
+    "mfussenegger/nvim-dap",
     dependencies = {
       { "rcarriga/nvim-dap-ui", dependencies = { "nvim-neotest/nvim-nio" } },
       { "jay-babu/mason-nvim-dap.nvim", opts = { ensure_installed = { "codelldb", "delve" } } },
@@ -16,5 +17,6 @@ return {
       dapui.setup()
       dap.listeners.before.attach.dapui_config = function() dapui.open() end
       dap.listeners.before.launch.dapui_config = function() dapui.open() end
-    end },
+    end,
+  },
 }

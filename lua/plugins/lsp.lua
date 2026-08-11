@@ -2,7 +2,8 @@ return {
   { "williamboman/mason.nvim", cmd = "Mason", opts = {} },
   { "j-hui/fidget.nvim", event = "LspAttach", opts = {} },
 
-  { "neovim/nvim-lspconfig",
+  {
+    "neovim/nvim-lspconfig",
     dependencies = {
       "williamboman/mason.nvim",
       "williamboman/mason-lspconfig.nvim",
@@ -11,9 +12,22 @@ return {
     },
     event = { "BufReadPre", "BufNewFile" },
     config = function()
-      local servers = { "lua_ls", "ts_ls", "svelte", "tailwindcss", "html",
-        "cssls", "jsonls", "eslint", "gopls", "clangd",
-        "kotlin_language_server", "dockerls", "sqls", "bashls" }
+      local servers = {
+        "lua_ls",
+        "ts_ls",
+        "svelte",
+        "tailwindcss",
+        "html",
+        "cssls",
+        "jsonls",
+        "eslint",
+        "gopls",
+        "clangd",
+        "kotlin_language_server",
+        "dockerls",
+        "sqls",
+        "bashls",
+      }
       require("mason").setup()
       -- automatic_enable enables ONLY installed servers (and enables each as its
       -- install completes). Do NOT manually vim.lsp.enable() the whole list —
@@ -33,12 +47,22 @@ return {
         .. "/mason/packages/svelte-language-server/node_modules/typescript-svelte-plugin"
       if vim.uv.fs_stat(svelte_ts_plugin) then
         vim.lsp.config("ts_ls", {
-          filetypes = { "javascript", "javascriptreact", "javascript.jsx",
-            "typescript", "typescriptreact", "typescript.tsx", "svelte" },
+          filetypes = {
+            "javascript",
+            "javascriptreact",
+            "javascript.jsx",
+            "typescript",
+            "typescriptreact",
+            "typescript.tsx",
+            "svelte",
+          },
           init_options = {
             plugins = {
-              { name = "typescript-svelte-plugin", location = svelte_ts_plugin,
-                languages = { "svelte" } },
+              {
+                name = "typescript-svelte-plugin",
+                location = svelte_ts_plugin,
+                languages = { "svelte" },
+              },
             },
           },
         })
@@ -49,9 +73,7 @@ return {
           local b = ev.buf
           -- Breadcrumbs (navic) are attached by barbecue (attach_navic=true).
           -- Attaching here too warns when a 2nd client (e.g. svelte + ts_ls) attaches.
-          local function m(lhs, rhs, desc)
-            vim.keymap.set("n", lhs, rhs, { buffer = b, desc = desc })
-          end
+          local function m(lhs, rhs, desc) vim.keymap.set("n", lhs, rhs, { buffer = b, desc = desc }) end
           m("gd", vim.lsp.buf.definition, "Go to definition")
           m("<F4>", vim.lsp.buf.definition, "Go to definition")
           m("gi", vim.lsp.buf.implementation, "Go to implementation")
@@ -60,31 +82,52 @@ return {
           m("K", vim.lsp.buf.hover, "Hover docs")
           m("<S-F6>", vim.lsp.buf.rename, "Rename")
           m("<A-CR>", vim.lsp.buf.code_action, "Code action")
-          m("<C-A-o>", function()
-            vim.lsp.buf.code_action({
-              context = { only = { "source.organizeImports" } }, apply = true })
-          end, "Organize imports")
+          m(
+            "<C-A-o>",
+            function()
+              vim.lsp.buf.code_action({
+                context = { only = { "source.organizeImports" } },
+                apply = true,
+              })
+            end,
+            "Organize imports"
+          )
         end,
       })
     end,
   },
 
-  { "stevearc/conform.nvim", event = "BufWritePre",
-    keys = { { "<C-A-l>", function() require("conform").format({ lsp_fallback = true }) end,
-              mode = { "n", "v" }, desc = "Reformat (IntelliJ)" } },
+  {
+    "stevearc/conform.nvim",
+    event = "BufWritePre",
+    keys = {
+      {
+        "<C-A-l>",
+        function() require("conform").format({ lsp_fallback = true }) end,
+        mode = { "n", "v" },
+        desc = "Reformat (IntelliJ)",
+      },
+    },
     opts = {
-      format_on_save = false,   -- user preference: OFF
+      format_on_save = false, -- user preference: OFF
       formatters_by_ft = {
         lua = { "stylua" },
         javascript = { "prettierd", "prettier", stop_after_first = true },
         typescript = { "prettierd", "prettier", stop_after_first = true },
         typescriptreact = { "prettierd", "prettier", stop_after_first = true },
-        svelte = { "prettier" }, css = { "prettier" }, html = { "prettier" },
-        json = { "prettier" }, go = { "gofmt" }, rust = { "rustfmt" },
+        svelte = { "prettier" },
+        css = { "prettier" },
+        html = { "prettier" },
+        json = { "prettier" },
+        go = { "gofmt" },
+        rust = { "rustfmt" },
       },
-    } },
+    },
+  },
 
-  { "mfussenegger/nvim-lint", event = "BufReadPost",
+  {
+    "mfussenegger/nvim-lint",
+    event = "BufReadPost",
     config = function()
       local lint = require("lint")
       -- JS/TS linting is handled by the eslint LSP; nvim-lint only covers extras
@@ -102,5 +145,6 @@ return {
           if #run > 0 then lint.try_lint(run) end
         end,
       })
-    end },
+    end,
+  },
 }

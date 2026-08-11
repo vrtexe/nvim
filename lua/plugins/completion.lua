@@ -1,5 +1,8 @@
 return {
-  { "saghen/blink.cmp", version = "*", event = "InsertEnter",
+  {
+    "saghen/blink.cmp",
+    version = "*",
+    event = "InsertEnter",
     opts = {
       keymap = {
         preset = "none",
@@ -12,5 +15,6 @@ return {
       },
       sources = { default = { "lsp", "path", "snippets", "buffer" } },
       completion = { documentation = { auto_show = true } },
-    } },
+    },
+  },
 }

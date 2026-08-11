@@ -1,8 +1,14 @@
 return {
-  { "nvim-neotest/neotest",
-    dependencies = { "nvim-lua/plenary.nvim", "nvim-neotest/nvim-nio",
+  {
+    "nvim-neotest/neotest",
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      "nvim-neotest/nvim-nio",
       "nvim-treesitter/nvim-treesitter",
-      "nvim-neotest/neotest-jest", "nvim-neotest/neotest-go", "mrcjkb/rustaceanvim" },
+      "nvim-neotest/neotest-jest",
+      "nvim-neotest/neotest-go",
+      "mrcjkb/rustaceanvim",
+    },
     keys = {
       { "<leader>tt", function() require("neotest").run.run() end, desc = "Test nearest" },
       { "<leader>tf", function() require("neotest").run.run(vim.fn.expand("%")) end, desc = "Test file" },
@@ -16,11 +22,16 @@ return {
           require("rustaceanvim.neotest"),
         },
       })
-    end },
+    end,
+  },
 
-  { "stevearc/overseer.nvim", cmd = { "OverseerRun", "OverseerToggle" },
+  {
+    "stevearc/overseer.nvim",
+    cmd = { "OverseerRun", "OverseerToggle" },
     keys = {
       { "<leader>rr", "<cmd>OverseerRun<cr>", desc = "Run task/build" },
       { "<leader>rl", "<cmd>OverseerToggle<cr>", desc = "Task list" },
-    }, opts = {} },
+    },
+    opts = {},
+  },
 }
