@@ -47,7 +47,23 @@ return {
 
   -- Auto-close and auto-rename HTML/JSX/TSX/Svelte/Vue tags
   { "windwp/nvim-ts-autotag", event = "InsertEnter", opts = {} },
-  { "HiPhish/rainbow-delimiters.nvim", event = "BufReadPost" },
+  {
+    "HiPhish/rainbow-delimiters.nvim",
+    event = "BufReadPost",
+    config = function()
+      -- Cycle the 6 custom bracket colors (defined in ui.lua) by nesting depth.
+      vim.g.rainbow_delimiters = {
+        highlight = {
+          "RainbowDelimiter1",
+          "RainbowDelimiter2",
+          "RainbowDelimiter3",
+          "RainbowDelimiter4",
+          "RainbowDelimiter5",
+          "RainbowDelimiter6",
+        },
+      }
+    end,
+  },
   { "lukas-reineke/indent-blankline.nvim", name = "ibl", main = "ibl", event = "BufReadPost", opts = {} },
   { "RRethy/vim-illuminate", event = "BufReadPost" },
 }
