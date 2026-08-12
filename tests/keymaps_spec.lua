@@ -43,7 +43,7 @@ assert(mapped("n", "<Esc>"), "base survives switch")
 
 -- 4. switch to consistent
 assert(km.switch("consistent") == true, "switch to consistent")
-assert(mapped("n", "<leader>zc") or mapped("n", " zc"), "consistent marker applied")
+assert(mapped("n", "<leader>cd"), "consistent marker applied")
 assert(not mapped("n", "<F17>"), "vscode marker torn down")
 
 -- 4b. switch to intellij applies its marker
@@ -101,5 +101,28 @@ end
 -- classic lsp spec is applied buffer-local via apply_lsp
 km.apply_lsp(0)
 assert(vim.fn.maparg("gh", "n") ~= "" or true, "placeholder") -- lsp maps checked in Task 8
+
+-- 10. consistent scheme: mnemonic leader-trees (spec §6.2)
+km.switch("consistent")
+for _, pair in ipairs({
+  { "n", "<leader>cd" },
+  { "n", "<leader>cr" },
+  { "n", "<leader>cn" },
+  { "n", "<leader>ca" },
+  { "n", "<leader>cf" },
+  { "n", "<leader>ci" },
+  { "n", "<leader>cy" },
+  { "n", "<leader>ck" },
+  { "n", "<leader>cs" },
+  { "n", "<leader>ff" },
+  { "n", "<leader>xn" },
+  { "n", "<leader>xp" },
+  { "n", "<leader>tt" },
+  { "n", "<leader>db" },
+  { "n", "<leader>gs" },
+}) do
+  assert(mapped(pair[1], pair[2]), "consistent map missing: " .. pair[1] .. " " .. pair[2])
+end
+assert(not mapped("n", "gd"), "consistent does not bind vim-native gd (torn down)")
 
 io.stdout:write("KEYMAPS-TESTS-PASS\n")
