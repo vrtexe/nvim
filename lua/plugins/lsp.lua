@@ -114,26 +114,8 @@ return {
           end
           -- Breadcrumbs (navic) are attached by barbecue (attach_navic=true).
           -- Attaching here too warns when a 2nd client (e.g. svelte + ts_ls) attaches.
-          local function m(lhs, rhs, desc) vim.keymap.set("n", lhs, rhs, { buffer = b, desc = desc }) end
-          m("gd", vim.lsp.buf.definition, "Go to definition")
-          m("<F4>", vim.lsp.buf.definition, "Go to definition")
-          m("gi", vim.lsp.buf.implementation, "Go to implementation")
-          -- Peek panel (glance.nvim) instead of the quickfix dump. gd stays a jump.
-          m("gr", "<cmd>Glance references<cr>", "Find references (peek)")
-          m("<A-F7>", "<cmd>Glance references<cr>", "Find references (peek)")
-          m("K", vim.lsp.buf.hover, "Hover docs")
-          m("<S-F6>", vim.lsp.buf.rename, "Rename")
-          m("<A-CR>", vim.lsp.buf.code_action, "Code action")
-          m(
-            "<C-A-o>",
-            function()
-              vim.lsp.buf.code_action({
-                context = { only = { "source.organizeImports" } },
-                apply = true,
-              })
-            end,
-            "Organize imports"
-          )
+          -- LSP keymaps are owned by the active keybinding scheme (lua/keymaps/*),
+          -- applied buffer-local via the keymaps.M.apply_lsp() LspAttach hook.
         end,
       })
     end,
@@ -142,14 +124,6 @@ return {
   {
     "stevearc/conform.nvim",
     event = "BufWritePre",
-    keys = {
-      {
-        "<C-A-l>",
-        function() require("conform").format({ lsp_fallback = true }) end,
-        mode = { "n", "v" },
-        desc = "Reformat (IntelliJ)",
-      },
-    },
     opts = {
       format_on_save = false, -- user preference: OFF
       formatters_by_ft = {

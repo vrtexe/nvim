@@ -143,6 +143,10 @@ function M.setup()
     complete = function() return M.MODES end,
     desc = "Switch keybinding mode",
   })
+  vim.api.nvim_create_autocmd("LspAttach", {
+    group = vim.api.nvim_create_augroup("keymaps_lsp", { clear = true }),
+    callback = function(args) M.apply_lsp(args.buf) end,
+  })
   apply(read_persisted() or "classic")
 end
 

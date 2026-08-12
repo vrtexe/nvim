@@ -106,9 +106,15 @@ for _, pair in ipairs({
 }) do
   assert(mapped(pair[1], pair[2]), "classic map missing: " .. pair[1] .. " " .. pair[2])
 end
--- classic lsp spec is applied buffer-local via apply_lsp
-km.apply_lsp(0)
-assert(vim.fn.maparg("gh", "n") ~= "" or true, "placeholder") -- lsp maps checked in Task 8
+-- LSP routing: apply_lsp binds buffer-local maps from the active scheme
+km.switch("classic")
+local buf = vim.api.nvim_create_buf(false, true)
+vim.api.nvim_set_current_buf(buf)
+km.apply_lsp(buf)
+assert(vim.fn.maparg("K", "n") ~= "", "classic lsp K applied buffer-local")
+-- switching re-applies: vscode binds <F12> buffer-local too
+km.switch("vscode")
+assert(vim.fn.maparg("<F12>", "n") ~= "", "vscode lsp <F12> present after switch")
 
 -- 10. consistent scheme: mnemonic leader-trees (spec §6.2)
 km.switch("consistent")
