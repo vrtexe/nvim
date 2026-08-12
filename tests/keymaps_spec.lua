@@ -6,6 +6,11 @@ local km = require("keymaps")
 -- helper: is (mode, lhs) currently mapped globally?
 local function mapped(mode, lhs) return vim.fn.maparg(lhs, mode) ~= "" end
 
+-- ensure a clean slate: a leftover persisted mode from a prior run (or a
+-- prior switch() call in this same run) must not affect the default-mode
+-- assertion below.
+os.remove(vim.fn.stdpath("data") .. "/keymap-mode")
+
 -- 1. MODES and default
 assert(vim.deep_equal(km.MODES, { "classic", "consistent", "vscode", "intellij" }), "MODES list")
 
@@ -105,7 +110,11 @@ assert(vim.fn.maparg("gh", "n") ~= "" or true, "placeholder") -- lsp maps checke
 -- 10. consistent scheme: mnemonic leader-trees (spec §6.2)
 km.switch("consistent")
 for _, pair in ipairs({
-  { "n", "<leader>cd" },
+  -- cD/ce/xb are consistent-only lhs (classic does not bind them), so they
+  -- discriminate a real consistent-only switch better than lhs classic
+  -- also happens to bind (e.g. plain cd/ff/tt/db/ca/cf are mapped by both
+  -- schemes, just to different actions in some cases).
+  { "n", "<leader>cD" },
   { "n", "<leader>cr" },
   { "n", "<leader>cn" },
   { "n", "<leader>ca" },
@@ -114,10 +123,10 @@ for _, pair in ipairs({
   { "n", "<leader>cy" },
   { "n", "<leader>ck" },
   { "n", "<leader>cs" },
-  { "n", "<leader>ff" },
+  { "n", "<leader>ce" },
   { "n", "<leader>xn" },
   { "n", "<leader>xp" },
-  { "n", "<leader>tt" },
+  { "n", "<leader>xb" },
   { "n", "<leader>db" },
   { "n", "<leader>gs" },
 }) do
