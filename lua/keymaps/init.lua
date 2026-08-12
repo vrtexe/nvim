@@ -21,7 +21,13 @@ local function apply_maps(list, sink, extra)
   for _, m in ipairs(list) do
     local mode, lhs, rhs, desc = m[1], m[2], m[3], m[4]
     local opts = vim.tbl_extend("force", { desc = desc, silent = true }, m.opts or {}, extra or {})
-    pcall(vim.keymap.set, mode, lhs, rhs, opts)
+    local ok, err = pcall(vim.keymap.set, mode, lhs, rhs, opts)
+    if not ok then
+      vim.notify(
+        "KeymapMode: failed to set [" .. tostring(mode) .. "] " .. tostring(lhs) .. ": " .. tostring(err),
+        vim.log.levels.WARN
+      )
+    end
     local modes = type(mode) == "table" and mode or { mode }
     for _, mo in ipairs(modes) do
       table.insert(sink, { mo, lhs })
@@ -89,7 +95,7 @@ end
 local function read_persisted()
   local f = io.open(STATE_FILE, "r")
   if not f then return nil end
-  local s = (f:read("*a") or ""):gsub("%s+$", "")
+  local s = (f:read("*a") or ""):gsub("^%s+", ""):gsub("%s+$", "")
   f:close()
   return is_mode(s) and s or nil
 end
