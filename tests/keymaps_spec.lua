@@ -47,4 +47,7 @@ assert(persisted == "vscode", "persisted mode is vscode, got '" .. persisted .. 
 vim.cmd("KeymapMode classic")
 assert(km.current() == "classic", ":KeymapMode classic switched")
 
+-- 8. pick() is callable without throwing (headless: vim.ui.select is a no-op)
+assert(pcall(function() vim.cmd("KeymapMode") end), ":KeymapMode (no arg) does not error")
+
 io.stdout:write("KEYMAPS-TESTS-PASS\n")

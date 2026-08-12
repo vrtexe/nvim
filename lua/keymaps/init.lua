@@ -115,14 +115,17 @@ function M.switch(name)
 end
 
 local function pick()
-  local items = M.MODES
-  local ok, snacks = pcall(require, "snacks")
-  if ok and snacks.picker then
-    vim.ui.select(items, { prompt = "Keymap mode (current: " .. (M._active or "?") .. ")" }, function(choice)
+  local current = M._active or "?"
+  local ok, Snacks = pcall(require, "snacks")
+  if ok and Snacks and Snacks.picker then
+    Snacks.picker.select(M.MODES, {
+      prompt = "Keymap mode (current: " .. current .. ")",
+      format_item = function(item) return item == current and (item .. "  (current)") or item end,
+    }, function(choice)
       if choice then M.switch(choice) end
     end)
   else
-    vim.ui.select(items, { prompt = "Keymap mode" }, function(choice)
+    vim.ui.select(M.MODES, { prompt = "Keymap mode (current: " .. current .. ")" }, function(choice)
       if choice then M.switch(choice) end
     end)
   end
