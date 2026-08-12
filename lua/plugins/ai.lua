@@ -17,21 +17,6 @@ return {
       "ClaudeCodeDiffAccept",
       "ClaudeCodeDiffDeny",
     },
-    keys = {
-      { "<leader>a", nil, desc = "AI/Claude Code" },
-      { "<leader>ac", "<cmd>ClaudeCode<cr>", desc = "Toggle Claude" },
-      { "<leader>af", "<cmd>ClaudeCodeFocus<cr>", desc = "Focus Claude" },
-      { "<leader>ar", "<cmd>ClaudeCode --resume<cr>", desc = "Resume Claude session" },
-      { "<leader>aC", "<cmd>ClaudeCode --continue<cr>", desc = "Continue last session" },
-      { "<leader>am", "<cmd>ClaudeCodeSelectModel<cr>", desc = "Select Claude model" },
-      { "<leader>ab", "<cmd>ClaudeCodeAdd %<cr>", desc = "Add current buffer to Claude" },
-      { "<leader>as", "<cmd>ClaudeCodeSend<cr>", mode = "v", desc = "Send selection to Claude" },
-      -- In neo-tree (your explorer), <leader>as mentions the file under the cursor
-      { "<leader>as", "<cmd>ClaudeCodeTreeAdd<cr>", desc = "Add file to Claude", ft = { "neo-tree", "netrw" } },
-      -- Diff review (also available as :w to accept / :q to reject inside the diff)
-      { "<leader>aa", "<cmd>ClaudeCodeDiffAccept<cr>", desc = "Accept Claude's diff" },
-      { "<leader>ad", "<cmd>ClaudeCodeDiffDeny<cr>", desc = "Reject Claude's diff" },
-    },
     opts = {
       terminal = {
         provider = "auto", -- picks snacks.terminal (installed) for a nicer window

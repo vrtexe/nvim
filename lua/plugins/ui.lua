@@ -71,8 +71,6 @@ return {
       vim.api.nvim_create_user_command("ThemeToggle", function()
         vim.cmd.colorscheme(vim.o.background == "dark" and LIGHT or DARK)
       end, { desc = "Toggle GitHub theme (dark/light)" })
-
-      vim.keymap.set("n", "<leader>ut", "<cmd>ThemeToggle<cr>", { desc = "Toggle theme (dark/light)" })
     end,
   },
 }

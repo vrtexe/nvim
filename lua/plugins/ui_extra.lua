@@ -17,10 +17,6 @@ return {
     event = "VeryLazy",
     dependencies = { "tiagovla/scope.nvim" },
     opts = { options = { diagnostics = "nvim_lsp", separator_style = "thick" } },
-    keys = {
-      { "<S-l>", "<cmd>BufferLineCycleNext<cr>", desc = "Next buffer/tab" },
-      { "<S-h>", "<cmd>BufferLineCyclePrev<cr>", desc = "Prev buffer/tab" },
-    },
   },
 
   { "folke/which-key.nvim", event = "VeryLazy", opts = {} },
