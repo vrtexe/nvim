@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Replace the ad-hoc keymap layer with three coherent, live-switchable keybinding schemes (classic / consistent / editor) driven by a central `:KeymapMode` manager, with all bindings centralized out of plugin specs.
+**Goal:** Replace the ad-hoc keymap layer with four coherent, live-switchable keybinding schemes (classic / consistent / vscode / intellij) driven by a central `:KeymapMode` manager, with all bindings centralized out of plugin specs.
 
-**Architecture:** A manager module (`lua/keymaps/init.lua`) applies a shared `base` scheme plus one active overlay (`classic`/`consistent`/`editor`), records every mapping it sets, and tears them down + re-applies on switch — live, no restart, choice persisted to `stdpath("data")/keymap-mode`. Plugins become keyless capability providers (lazy via `cmd`/`event`/`ft`); all bindings live in the scheme modules. LSP buffer-local maps are routed through the manager via an `LspAttach` autocmd so they switch too.
+**Architecture:** A manager module (`lua/keymaps/init.lua`) applies a shared `base` scheme plus one active overlay (`classic`/`consistent`/`vscode`/`intellij`), records every mapping it sets, and tears them down + re-applies on switch — live, no restart, choice persisted to `stdpath("data")/keymap-mode`. Plugins become keyless capability providers (lazy via `cmd`/`event`/`ft`); all bindings live in the scheme modules. LSP buffer-local maps are routed through the manager via an `LspAttach` autocmd so they switch too.
 
 **Tech Stack:** Neovim 0.12.4 (Lua), lazy.nvim, which-key.nvim, snacks.nvim (picker/ui.select), headless-nvim bash tests.
 
@@ -14,6 +14,7 @@
 
 - Neovim baseline **0.12.4** — `gr*` LSP defaults ship built-in; scheme maps override deliberately.
 - `mapleader` = `<Space>`, `maplocalleader` = `\` (already set in `options.lua`; grug-far depends on it).
+- The four modes are `classic`, `consistent`, `vscode`, `intellij`. `vscode` and `intellij` are separate, self-contained pure IDE emulations (no combined mode; no cross-IDE conflict resolution).
 - Scheme modules return **data only** (no side effects at require time). Shape: `{ name, desc, maps, lsp?, groups? }`.
 - `maps`/`lsp` entry shape: `{ mode, lhs, rhs, desc, opts? }` where `mode` is a string or list of strings.
 - The config MUST stay loadable (`scripts/healthcheck.sh` green) after **every** task. `scripts/smoke.sh` must stay green after plugin-cutover tasks.
@@ -31,7 +32,8 @@
 - `lua/keymaps/base.lua` — universal bindings (all modes).
 - `lua/keymaps/classic.lua` — vim-native overlay.
 - `lua/keymaps/consistent.lua` — mnemonic leader-tree overlay.
-- `lua/keymaps/editor.lua` — IntelliJ + VS Code overlay.
+- `lua/keymaps/vscode.lua` — VS Code emulation overlay.
+- `lua/keymaps/intellij.lua` — IntelliJ emulation overlay.
 - `tests/keymaps_spec.lua` — headless Lua assertions (loaded by the test script).
 - `scripts/keymaps_test.sh` — headless runner for the mode system.
 
@@ -49,7 +51,7 @@
 **Files:**
 - Create: `lua/keymaps/init.lua`
 - Create: `lua/keymaps/base.lua` (temporary minimal stub, expanded in Task 4)
-- Create: `lua/keymaps/classic.lua`, `lua/keymaps/consistent.lua`, `lua/keymaps/editor.lua` (temporary minimal stubs, expanded in Tasks 5-7)
+- Create: `lua/keymaps/classic.lua`, `lua/keymaps/consistent.lua`, `lua/keymaps/vscode.lua`, `lua/keymaps/intellij.lua` (temporary minimal stubs, expanded in Tasks 5-7)
 - Create: `tests/keymaps_spec.lua`
 - Create: `scripts/keymaps_test.sh`
 
@@ -58,10 +60,10 @@
   - `require("keymaps").setup()` — read persisted mode (or `classic`), apply base+overlay.
   - `require("keymaps").switch(name)` — teardown current, apply `name`, persist, notify. Returns `true` on success, `false` if `name` invalid.
   - `require("keymaps").current()` — returns active mode name string.
-  - `require("keymaps").MODES` — `{ "classic", "consistent", "editor" }`.
+  - `require("keymaps").MODES` — `{ "classic", "consistent", "vscode", "intellij" }`.
   - `require("keymaps").apply_lsp(bufnr)` — apply active scheme's `lsp` maps buffer-local (used by Task 8's autocmd; testable directly).
   - Ex command `:KeymapMode [name]`.
-- Consumes: scheme modules `keymaps.base`, `keymaps.classic`, `keymaps.consistent`, `keymaps.editor` (data tables).
+- Consumes: scheme modules `keymaps.base`, `keymaps.classic`, `keymaps.consistent`, `keymaps.vscode`, `keymaps.intellij` (data tables).
 
 - [ ] **Step 1: Create minimal scheme stubs so requires resolve**
 
@@ -106,14 +108,28 @@ return {
 }
 ```
 
-`lua/keymaps/editor.lua`:
+`lua/keymaps/vscode.lua`:
 ```lua
--- IntelliJ + VS Code overlay. Expanded in Task 7.
+-- VS Code emulation overlay. Expanded in Task 7.
 return {
-  name = "editor",
-  desc = "IntelliJ + VS Code",
+  name = "vscode",
+  desc = "VS Code emulation",
   maps = {
-    { "n", "<F17>", "<cmd>echo 'editor'<cr>", "editor marker" },
+    { "n", "<F17>", "<cmd>echo 'vscode'<cr>", "vscode marker" },
+  },
+  lsp = {},
+  groups = {},
+}
+```
+
+`lua/keymaps/intellij.lua`:
+```lua
+-- IntelliJ emulation overlay. Expanded in Task 7.
+return {
+  name = "intellij",
+  desc = "IntelliJ emulation",
+  maps = {
+    { "n", "<F18>", "<cmd>echo 'intellij'<cr>", "intellij marker" },
   },
   lsp = {},
   groups = {},
@@ -135,7 +151,7 @@ local function mapped(mode, lhs)
 end
 
 -- 1. MODES and default
-assert(vim.deep_equal(km.MODES, { "classic", "consistent", "editor" }), "MODES list")
+assert(vim.deep_equal(km.MODES, { "classic", "consistent", "vscode", "intellij" }), "MODES list")
 
 -- 2. setup() applies base + default overlay (classic)
 km.setup()
@@ -144,28 +160,32 @@ assert(mapped("n", "<Esc>"), "base <Esc> applied")
 assert(mapped("n", "gh"), "classic marker applied")
 
 -- 3. switch() tears down previous overlay and applies the new one
-assert(km.switch("editor") == true, "switch to editor returns true")
-assert(km.current() == "editor", "current is editor")
-assert(mapped("n", "<F17>"), "editor marker applied after switch")
+assert(km.switch("vscode") == true, "switch to vscode returns true")
+assert(km.current() == "vscode", "current is vscode")
+assert(mapped("n", "<F17>"), "vscode marker applied after switch")
 assert(not mapped("n", "gh"), "classic marker torn down after switch")
 assert(mapped("n", "<Esc>"), "base survives switch")
 
 -- 4. switch to consistent
 assert(km.switch("consistent") == true, "switch to consistent")
 assert(mapped("n", "<leader>zc") or mapped("n", " zc"), "consistent marker applied")
-assert(not mapped("n", "<F17>"), "editor marker torn down")
+assert(not mapped("n", "<F17>"), "vscode marker torn down")
+
+-- 4b. switch to intellij applies its marker
+assert(km.switch("intellij") == true, "switch to intellij")
+assert(mapped("n", "<F18>"), "intellij marker applied")
 
 -- 5. invalid mode rejected
 assert(km.switch("nonsense") == false, "invalid mode returns false")
-assert(km.current() == "consistent", "invalid switch does not change mode")
+assert(km.current() == "intellij", "invalid switch does not change mode")
 
 -- 6. persistence: switch writes the state file
-km.switch("editor")
+km.switch("vscode")
 local f = io.open(vim.fn.stdpath("data") .. "/keymap-mode", "r")
 assert(f, "state file exists")
 local persisted = (f:read("*a") or ""):gsub("%s+$", "")
 f:close()
-assert(persisted == "editor", "persisted mode is editor, got '" .. persisted .. "'")
+assert(persisted == "vscode", "persisted mode is vscode, got '" .. persisted .. "'")
 
 -- 7. :KeymapMode command switches
 vim.cmd("KeymapMode classic")
@@ -197,7 +217,7 @@ Expected: FAIL — `module 'keymaps' not found` (init.lua doesn't exist yet).
 ```lua
 local M = {}
 
-M.MODES = { "classic", "consistent", "editor" }
+M.MODES = { "classic", "consistent", "vscode", "intellij" }
 local STATE_FILE = vim.fn.stdpath("data") .. "/keymap-mode"
 
 M._active = nil
@@ -1062,113 +1082,171 @@ git commit -m "feat(keymaps): author consistent (mnemonic leader-tree) scheme"
 
 ---
 
-## Task 7: Author `editor.lua` (IntelliJ + VS Code overlay)
+## Task 7: Author `vscode.lua` and `intellij.lua` (pure IDE overlays)
 
 **Files:**
-- Modify: `lua/keymaps/editor.lua`
+- Modify: `lua/keymaps/vscode.lua`
+- Modify: `lua/keymaps/intellij.lua`
 - Modify: `tests/keymaps_spec.lua`
 
 **Interfaces:**
-- Produces: `keymaps.editor`. Source: spec §6.3 + §7 (conflict policy: IntelliJ wins) + §12.
-  A small helper picks mac vs win/linux keys via `vim.fn.has("mac")`.
+- Produces: `keymaps.vscode` (spec §6.3) and `keymaps.intellij` (spec §6.4). Two
+  separate, self-contained pure emulations — no cross-IDE conflict handling. A
+  `K(mac, win)` helper picks the platform literal via `vim.fn.has("mac")`.
+- Consumes: base + the same plugin capabilities as classic; only the LHS differs.
 
 - [ ] **Step 1: Write the failing test**
 
-Append (in a `km.switch("editor")` block):
+Add this helper near the top of `tests/keymaps_spec.lua` (right after the `mapped` helper):
 ```lua
-km.switch("editor")
--- platform-agnostic keys that exist in both families
+local is_mac = vim.fn.has("mac") == 1
+local function mac_key(m, w) return { "n", is_mac and m or w } end
+```
+Append the mode assertions:
+```lua
+km.switch("vscode")
 for _, pair in ipairs({
-  { "n", "<F12>" },   -- vscode goto-def
-  { "n", "<S-F12>" }, -- vscode references
-  { "n", "<A-F7>" },  -- intellij usages
-  { "n", "<S-F6>" },  -- intellij rename
-  { "n", "<F8>" },    -- intellij step-over (wins over vscode next-problem)
-  { "n", "<F2>" },    -- intellij next-error (wins over vscode rename)
-  { "n", "<leader>1" }, -- tool-window: project (editor mode only)
+  { "n", "<F12>" }, { "n", "<S-F12>" }, { "n", "<F2>" }, { "n", "<F5>" },
+  { "n", "<F9>" }, { "n", "<F10>" }, mac_key("<D-b>", "<C-b>"),
+  mac_key("<D-p>", "<C-p>"), mac_key("<D-.>", "<C-.>"),
 }) do
-  assert(mapped(pair[1], pair[2]), "editor map missing: " .. pair[1] .. " " .. pair[2])
+  assert(mapped(pair[1], pair[2]), "vscode map missing: " .. pair[1] .. " " .. pair[2])
+end
+assert(not mapped("n", "gd"), "vscode does not bind vim-native gd")
+
+km.switch("intellij")
+for _, pair in ipairs({
+  mac_key("<D-b>", "<C-b>"), { "n", "<A-F7>" }, { "n", "<S-F6>" },
+  { "n", "<A-CR>" }, { "n", "<F8>" }, { "n", "<F7>" }, { "n", "<F2>" },
+  { "n", "<S-F10>" }, { "n", "<S-F9>" }, { "n", "<leader>1" },
+}) do
+  assert(mapped(pair[1], pair[2]), "intellij map missing: " .. pair[1] .. " " .. pair[2])
 end
 ```
 
 - [ ] **Step 2: Run to verify it fails**
 
 Run: `bash scripts/keymaps_test.sh`
-Expected: FAIL — editor map missing.
+Expected: FAIL — vscode/intellij map missing (stubs only have marker keys).
 
-- [ ] **Step 3: Implement `editor.lua`**
+- [ ] **Step 3: Implement `vscode.lua`**
 
-`lua/keymaps/editor.lua`:
+`lua/keymaps/vscode.lua`:
 ```lua
--- IntelliJ + VS Code overlay (spec §6.3). Both keymaps coexist; where they
--- collide on the same key, IntelliJ wins (spec §7/§12). Tool-window number
--- focus (<leader>1-8) is an IDE concept and lives ONLY in this mode.
+-- VS Code default-keymap emulation (spec §6.3). Pure — no IntelliJ keys.
 local mac = vim.fn.has("mac") == 1
--- pick mac vs win/linux literal for keys whose families differ
 local function K(m, w) return mac and m or w end
+local function snacks() return require("snacks") end
+
+return {
+  name = "vscode",
+  desc = "VS Code emulation",
+  maps = {
+    -- navigation / code insight
+    { "n", "<F12>", vim.lsp.buf.definition, "Goto definition" },
+    { "n", "<A-F12>", "<cmd>Glance definitions<cr>", "Peek definition" },
+    { "n", K("<D-F12>", "<C-F12>"), vim.lsp.buf.implementation, "Goto implementations" },
+    { "n", "<S-F12>", "<cmd>Glance references<cr>", "References" },
+    { "n", K("<D-k><D-i>", "<C-k><C-i>"), vim.lsp.buf.hover, "Hover" },
+    { "n", "<F2>", vim.lsp.buf.rename, "Rename" },
+    { { "n", "x" }, K("<D-.>", "<C-.>"), vim.lsp.buf.code_action, "Quick fix" },
+    { "n", "<S-A-f>", function() require("conform").format({ async = true, lsp_format = "fallback" }) end, "Format document" },
+    { "n", "<S-A-o>", function() vim.lsp.buf.code_action({ context = { only = { "source.organizeImports" } }, apply = true }) end, "Organize imports" },
+    -- pickers
+    { "n", K("<D-p>", "<C-p>"), function() snacks().picker.files() end, "Go to file" },
+    { "n", K("<D-S-p>", "<C-S-p>"), function() snacks().picker.commands() end, "Command palette" },
+    { "n", K("<D-S-o>", "<C-S-o>"), function() snacks().picker.lsp_symbols() end, "Symbols in file" },
+    { "n", K("<D-S-f>", "<C-S-f>"), function() require("grug-far").open() end, "Find in files" },
+    -- diagnostics
+    { "n", "<F8>", function() vim.diagnostic.jump({ count = 1, float = true }) end, "Next problem" },
+    { "n", "<S-F8>", function() vim.diagnostic.jump({ count = -1, float = true }) end, "Prev problem" },
+    -- panels
+    { "n", K("<D-b>", "<C-b>"), "<cmd>Neotree toggle<cr>", "Toggle sidebar" },
+    { "n", "<C-`>", "<cmd>ToggleTerm<cr>", "Toggle terminal" },
+    { "n", "<C-S-g>", "<cmd>DiffviewOpen<cr>", "Source control" },
+    { "n", K("<D-1>", "<C-1>"), "<cmd>BufferLineGoToBuffer 1<cr>", "Editor group 1" },
+    { "n", K("<D-2>", "<C-2>"), "<cmd>BufferLineGoToBuffer 2<cr>", "Editor group 2" },
+    { "n", K("<D-3>", "<C-3>"), "<cmd>BufferLineGoToBuffer 3<cr>", "Editor group 3" },
+    -- debug
+    { "n", "<F5>", function() require("dap").continue() end, "Start / continue debug" },
+    { "n", "<F9>", function() require("dap").toggle_breakpoint() end, "Toggle breakpoint" },
+    { "n", "<F10>", function() require("dap").step_over() end, "Step over" },
+    { "n", "<F11>", function() require("dap").step_into() end, "Step into" },
+    { "n", "<S-F11>", function() require("dap").step_out() end, "Step out" },
+    -- editing
+    { "n", K("<D-/>", "<C-/>"), "gcc", "Comment line", opts = { remap = true } },
+    { "x", K("<D-/>", "<C-/>"), "gc", "Comment line", opts = { remap = true } },
+  },
+  lsp = {
+    { "n", "<F12>", vim.lsp.buf.definition, "Goto definition" },
+    { "n", "<S-F12>", "<cmd>Glance references<cr>", "References" },
+  },
+  groups = {},
+}
+```
+
+- [ ] **Step 4: Implement `intellij.lua`**
+
+`lua/keymaps/intellij.lua`:
+```lua
+-- IntelliJ IDEA default-keymap emulation (spec §6.4). Pure — no VS Code keys.
+-- Run/Debug use <S-F10>/<S-F9> on both platforms (mac ⌃R/⌃D would shadow vim).
+-- Tool-window number focus (<leader>1-8) is IntelliJ's signature, only here.
+local mac = vim.fn.has("mac") == 1
+local function K(m, w) return mac and m or w end
+local function snacks() return require("snacks") end
 
 local function focus_editor()
   local prev = vim.fn.win_getid(vim.fn.winnr("#"))
   if prev ~= 0 and vim.api.nvim_win_is_valid(prev) and vim.bo[vim.api.nvim_win_get_buf(prev)].buftype == "" then
-    vim.api.nvim_set_current_win(prev)
-    return
+    vim.api.nvim_set_current_win(prev); return
   end
   for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
     if vim.bo[vim.api.nvim_win_get_buf(win)].buftype == "" then
-      vim.api.nvim_set_current_win(win)
-      return
+      vim.api.nvim_set_current_win(win); return
     end
   end
 end
 
 return {
-  name = "editor",
-  desc = "IntelliJ + VS Code",
+  name = "intellij",
+  desc = "IntelliJ emulation",
   maps = {
-    -- ===== VS Code family (function keys, cross-platform) =====
-    { "n", "<F12>", vim.lsp.buf.definition, "Goto definition (VSCode)" },
-    { "n", "<A-F12>", "<cmd>Glance definitions<cr>", "Peek definition (VSCode)" },
-    { "n", "<S-F12>", "<cmd>Glance references<cr>", "References (VSCode)" },
-    { "n", K("<D-F12>", "<C-F12>"), vim.lsp.buf.implementation, "Implementations (VSCode)" },
-    { "n", "<F2>", vim.diagnostic.open_float, "Error description — see note" }, -- overridden below by IntelliJ next-error
-    { "n", K("<D-.>", "<C-.>"), vim.lsp.buf.code_action, "Quick fix (VSCode)" },
-    { "n", "<S-A-f>", function() require("conform").format({ async = true, lsp_format = "fallback" }) end, "Format (VSCode)" },
-    { "n", "<S-A-o>", function() vim.lsp.buf.code_action({ context = { only = { "source.organizeImports" } }, apply = true }) end, "Organize imports (VSCode)" },
-    { "n", K("<D-p>", "<C-p>"), function() require("snacks").picker.files() end, "Go to file (VSCode)" },
-    { "n", K("<D-S-p>", "<C-S-p>"), function() require("snacks").picker.commands() end, "Command palette (VSCode)" },
+    -- navigation
+    { "n", K("<D-b>", "<C-b>"), vim.lsp.buf.definition, "Goto definition" },
+    { "n", K("<D-A-b>", "<C-A-b>"), vim.lsp.buf.implementation, "Goto implementation" },
+    { "n", K("<D-S-b>", "<C-S-b>"), vim.lsp.buf.type_definition, "Goto type declaration" },
+    { "n", "<A-F7>", "<cmd>Glance references<cr>", "Find usages" },
+    { "n", "<A-Space>", "<cmd>Glance definitions<cr>", "Quick definition" },
+    { "n", "<F1>", vim.lsp.buf.hover, "Quick doc" },
+    { "n", K("<D-o>", "<C-n>"), function() snacks().picker.files() end, "Go to class/file" },
+    { "n", K("<D-A-o>", "<C-A-S-n>"), function() snacks().picker.lsp_symbols() end, "Go to symbol" },
+    { "n", K("<D-e>", "<C-e>"), function() snacks().picker.recent() end, "Recent files" },
+    { "n", K("<D-F12>", "<C-F12>"), "<cmd>AerialToggle<cr>", "File structure" },
+    -- refactor / edit
+    { "n", "<S-F6>", vim.lsp.buf.rename, "Rename" },
+    { { "n", "x" }, "<A-CR>", vim.lsp.buf.code_action, "Intention / quick fix" },
+    { "n", K("<D-A-l>", "<C-A-l>"), function() require("conform").format({ async = true, lsp_format = "fallback" }) end, "Reformat code" },
+    { "n", "<C-A-o>", function() vim.lsp.buf.code_action({ context = { only = { "source.organizeImports" } }, apply = true }) end, "Optimize imports" },
+    { "n", K("<D-d>", "<C-d>"), "yyp", "Duplicate line" },
+    { "n", K("<D-/>", "<C-/>"), "gcc", "Comment line", opts = { remap = true } },
+    { "x", K("<D-/>", "<C-/>"), "gc", "Comment line", opts = { remap = true } },
+    -- diagnostics
+    { "n", "<F2>", function() vim.diagnostic.jump({ count = 1, float = true, severity = vim.diagnostic.severity.ERROR }) end, "Next error" },
+    { "n", "<S-F2>", function() vim.diagnostic.jump({ count = -1, float = true, severity = vim.diagnostic.severity.ERROR }) end, "Prev error" },
+    -- search
     { "n", K("<D-S-f>", "<C-S-f>"), function() require("grug-far").open() end, "Find in files" },
-    { "n", K("<D-S-o>", "<C-S-o>"), function() require("snacks").picker.lsp_symbols() end, "Symbols in file (VSCode)" },
-    { "n", "<F5>", function() require("dap").continue() end, "Debug (VSCode)" },
-    { "n", "<F9>", function() require("dap").toggle_breakpoint() end, "Toggle breakpoint (VSCode)" },
-    { "n", "<F10>", function() require("dap").step_over() end, "Step over (VSCode)" },
-    { "n", "<F11>", function() require("dap").step_into() end, "Step into (VSCode)" },
-    { "n", "<S-F11>", function() require("dap").step_out() end, "Step out (VSCode)" },
-
-    -- ===== IntelliJ family (wins conflicts) =====
-    { "n", K("<D-b>", "<C-b>"), vim.lsp.buf.definition, "Goto definition (IntelliJ)" },
-    { "n", K("<D-A-b>", "<C-A-b>"), vim.lsp.buf.implementation, "Implementation (IntelliJ)" },
-    { "n", K("<D-S-b>", "<C-S-b>"), vim.lsp.buf.type_definition, "Type declaration (IntelliJ)" },
-    { "n", "<A-F7>", "<cmd>Glance references<cr>", "Find usages (IntelliJ)" },
-    { "n", "<A-Space>", "<cmd>Glance definitions<cr>", "Quick definition (IntelliJ)" },
-    { "n", "<F1>", vim.lsp.buf.hover, "Quick doc (IntelliJ)" },
-    { "n", "<S-F6>", vim.lsp.buf.rename, "Rename (IntelliJ)" },
-    { { "n", "x" }, "<A-CR>", vim.lsp.buf.code_action, "Intention/quick-fix (IntelliJ)" },
-    { "n", K("<D-A-l>", "<C-A-l>"), function() require("conform").format({ async = true, lsp_format = "fallback" }) end, "Reformat (IntelliJ)" },
-    { "n", "<C-A-o>", function() vim.lsp.buf.code_action({ context = { only = { "source.organizeImports" } }, apply = true }) end, "Optimize imports (IntelliJ)" },
-    -- next/prev error (IntelliJ) — F2/S-F2 WIN over VSCode rename/prev-problem
-    { "n", "<F2>", function() vim.diagnostic.jump({ count = 1, float = true, severity = vim.diagnostic.severity.ERROR }) end, "Next error (IntelliJ)" },
-    { "n", "<S-F2>", function() vim.diagnostic.jump({ count = -1, float = true, severity = vim.diagnostic.severity.ERROR }) end, "Prev error (IntelliJ)" },
-    { "n", K("<D-S-o>", nil) or "<A-F1>", function() require("snacks").picker.files() end, "Go to file (IntelliJ) — see note" },
-    { "n", K("<D-e>", "<C-e>"), function() require("snacks").picker.recent() end, "Recent files (IntelliJ)" },
-    { "n", K("<D-F12>", "<C-F12>"), function() require("snacks").picker.lsp_symbols() end, "File structure (IntelliJ)" },
-    { "n", "<C-r>", "<cmd>OverseerRun<cr>", "Run (IntelliJ)" }, -- see note: mac ⌃R
-    { "n", "<C-d>", function() require("dap").continue() end, "Debug (IntelliJ)" }, -- mac ⌃D
-    { "n", "<F8>", function() require("dap").step_over() end, "Step over (IntelliJ) — wins" },
-    { "n", "<F7>", function() require("dap").step_into() end, "Step into (IntelliJ)" },
-    { "n", "<S-F8>", function() require("dap").step_out() end, "Step out (IntelliJ) — wins" },
-    { "n", K("<D-F8>", "<C-F8>"), function() require("dap").toggle_breakpoint() end, "Breakpoint (IntelliJ)" },
-
-    -- ===== Tool windows (IntelliJ ⌘/Alt + number) — editor mode ONLY =====
+    -- run / debug
+    { "n", "<S-F10>", "<cmd>OverseerRun<cr>", "Run" },
+    { "n", "<S-F9>", function() require("dap").continue() end, "Debug" },
+    { "n", "<F8>", function() require("dap").step_over() end, "Step over" },
+    { "n", "<F7>", function() require("dap").step_into() end, "Step into" },
+    { "n", "<S-F8>", function() require("dap").step_out() end, "Step out" },
+    { "n", K("<D-F8>", "<C-F8>"), function() require("dap").toggle_breakpoint() end, "Toggle breakpoint" },
+    -- git / terminal
+    { "n", K("<D-k>", "<C-k>"), "<cmd>LazyGit<cr>", "Commit / git" },
+    { "n", "<A-F12>", "<cmd>ToggleTerm<cr>", "Terminal" },
+    -- tool windows (IntelliJ ⌘/Alt + number) — intellij mode only
     { "n", "<leader>1", "<cmd>Neotree focus<cr>", "Tool: project" },
     { "n", "<leader>2", function()
       for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
@@ -1179,7 +1257,7 @@ return {
       vim.cmd("ToggleTerm")
     end, "Tool: terminal" },
     { "n", "<leader>3", focus_editor, "Tool: editor" },
-    { "n", "<leader>4", "<cmd>OverseerToggle<cr>", "Tool: run/tasks" },
+    { "n", "<leader>4", "<cmd>OverseerToggle<cr>", "Tool: run" },
     { "n", "<leader>5", function() require("dap"); require("dapui").toggle() end, "Tool: debug" },
     { "n", "<leader>6", "<cmd>AerialToggle<cr>", "Tool: structure" },
     { "n", "<leader>7", function() require("neotest").summary.toggle() end, "Tool: tests" },
@@ -1187,56 +1265,25 @@ return {
       local lib = require("diffview.lib")
       if lib.get_current_view() then vim.cmd("DiffviewClose") else vim.cmd("DiffviewOpen") end
     end, "Tool: version control" },
-
-    -- ===== Shared editor conveniences =====
-    { "n", "<D-d>", "yyp", "Duplicate line (IntelliJ)" },
-    { "n", K("<D-/>", "<C-/>"), "gcc", "Comment line", opts = { remap = true } },
-    { "x", K("<D-/>", "<C-/>"), "gc", "Comment line", opts = { remap = true } },
-    { "n", K("<D-k>", "<C-k>"), "<cmd>LazyGit<cr>", "Commit / git (IntelliJ ⌘K)" },
   },
   lsp = {
     { "n", "<F1>", vim.lsp.buf.hover, "Quick doc" },
-    { "n", "<F12>", vim.lsp.buf.definition, "Goto definition" },
+    { "n", K("<D-b>", "<C-b>"), vim.lsp.buf.definition, "Goto definition" },
   },
-  groups = {
-    { "<leader>1", hidden = true },
-  },
+  groups = {},
 }
 ```
-
-> **Notes (fold into implementation, do not leave as prose in the module):**
-> - The `K("<D-S-o>", nil) or "<A-F1>"` entry is a placeholder for IntelliJ
->   "Go to File" (`⌘⇧O`) which **collides** with VS Code "Symbols in file"
->   (`⌘⇧O`). Per §7 IntelliJ wins — but VS Code symbols is the more useful nvim
->   action. RESOLUTION: give `⌘⇧O`/`⌃⇧O` to **symbols** (already bound in the
->   VS Code block) and bind IntelliJ Go-to-File to `⌘O`/`⌃N` instead. Replace
->   that line with: `{ "n", K("<D-o>", "<C-n>"), function() require("snacks").picker.files() end, "Go to class/file (IntelliJ)" }`.
-> - `<C-r>` (IntelliJ Run, mac ⌃R) and `<C-d>` (IntelliJ Debug, mac ⌃D) shadow
->   useful vim keys (redo / half-page-down). On win/linux IntelliJ uses
->   `Shift+F10`/`Shift+F9`. RESOLUTION: bind Run/Debug to `<S-F10>`/`<S-F9>`
->   on BOTH platforms (safe, no vim shadow) and DROP the `<C-r>`/`<C-d>`
->   variants. Replace those two lines with:
->   `{ "n", "<S-F10>", "<cmd>OverseerRun<cr>", "Run (IntelliJ)" }` and
->   `{ "n", "<S-F9>", function() require("dap").continue() end, "Debug (IntelliJ)" }`.
-> - Remove the earlier `<F2>` "Error description" VS Code line (the IntelliJ
->   next-error `<F2>` is the winner); keep only the IntelliJ `<F2>`/`<S-F2>`.
-
-- [ ] **Step 4: Apply the three resolutions from the notes**
-
-Edit `editor.lua` per the notes: (a) replace the placeholder go-to-file line,
-(b) replace `<C-r>`/`<C-d>` run/debug with `<S-F10>`/`<S-F9>`, (c) delete the
-duplicate VS Code `<F2>` "Error description" line.
 
 - [ ] **Step 5: Run test to verify it passes**
 
 Run: `bash scripts/keymaps_test.sh`
-Expected: PASS (all editor probe keys present; no Lua errors).
+Expected: PASS (all vscode + intellij probe keys present; no Lua errors).
 
 - [ ] **Step 6: Commit**
 
 ```bash
-git add lua/keymaps/editor.lua tests/keymaps_spec.lua
-git commit -m "feat(keymaps): author editor (IntelliJ + VS Code) scheme"
+git add lua/keymaps/vscode.lua lua/keymaps/intellij.lua tests/keymaps_spec.lua
+git commit -m "feat(keymaps): author vscode + intellij (pure IDE) schemes"
 ```
 
 ---
@@ -1262,9 +1309,9 @@ local buf = vim.api.nvim_create_buf(false, true)
 vim.api.nvim_set_current_buf(buf)
 km.apply_lsp(buf)
 assert(vim.fn.maparg("K", "n") ~= "", "classic lsp K applied buffer-local")
--- switching re-applies: editor binds <F12> buffer-local too
-km.switch("editor")
-assert(vim.fn.maparg("<F12>", "n") ~= "", "editor lsp <F12> present after switch")
+-- switching re-applies: vscode binds <F12> buffer-local too
+km.switch("vscode")
+assert(vim.fn.maparg("<F12>", "n") ~= "", "vscode lsp <F12> present after switch")
 ```
 
 - [ ] **Step 2: Run to verify it fails / passes**
@@ -1429,10 +1476,11 @@ Expected: all green.
 
 - [ ] **Step 4: Verify each mode end-to-end manually**
 
-Run: `nvim`; `:KeymapMode editor` → confirm `<F12>` goto-def, `<S-F6>` rename,
-`<leader>1` project. `:KeymapMode consistent` → `<leader>cd` def, `<leader>cn`
-rename. `:KeymapMode classic` → `gd`, `gr`, `]h`. Restart nvim → confirm the last
-chosen mode persisted.
+Run: `nvim`; `:KeymapMode vscode` → confirm `<F12>` goto-def, `<F2>` rename;
+`:KeymapMode intellij` → `<D-b>` (or `<C-b>`) goto-def, `<S-F6>` rename, `<leader>1`
+project. `:KeymapMode consistent` → `<leader>cd` def, `<leader>cn` rename.
+`:KeymapMode classic` → `gd`, `gr`, `]h`. Restart nvim → confirm the last chosen
+mode persisted.
 
 - [ ] **Step 5: Commit**
 
@@ -1456,7 +1504,7 @@ git commit -m "refactor(keymaps): remove legacy core/keymaps.lua (fully re-homed
 Before `echo "== SMOKE DONE`:
 ```bash
 echo "== 6. Keymap modes cycle cleanly =="
-modes=$(nvim --headless "+lua local km=require('keymaps'); for _,m in ipairs({'classic','consistent','editor','classic'}) do assert(km.switch(m), 'switch '..m) end; io.stdout:write('MODES-CYCLE-OK\n')" "+qa" 2>&1)
+modes=$(nvim --headless "+lua local km=require('keymaps'); for _,m in ipairs({'classic','consistent','vscode','intellij','classic'}) do assert(km.switch(m), 'switch '..m) end; io.stdout:write('MODES-CYCLE-OK\n')" "+qa" 2>&1)
 echo "$modes" | grep -q "MODES-CYCLE-OK" && echo "MODES-OK" || { echo "FAIL: mode cycle"; fail=1; }
 ```
 
@@ -1476,6 +1524,6 @@ git commit -m "test(keymaps): mode-cycle check in smoke test"
 
 ## Self-Review Notes (author)
 
-- **Spec coverage:** manager+switch+persist+picker (§4 → Tasks 1-3), base (§5 → Task 4), classic/consistent/editor (§6 → Tasks 5-7), conflict resolutions §12 folded into base/overlays (harpoon on `<leader>1-4`, tool-windows editor-only, illuminate `]r`/`[r`), editor conflict policy §7 (Task 7 notes), plugin centralization §4.4 (Tasks 9-11), LSP routing §4.3 (Task 8), testing §9 (Tasks 1,12). Docs §8 → **Plan 2 (separate)**.
+- **Spec coverage:** manager+switch+persist+picker (§4 → Tasks 1-3), base (§5 → Task 4), classic/consistent (§6.1-6.2 → Tasks 5-6), vscode/intellij pure IDE modes (§6.3-6.4 → Task 7), conflict resolutions §12 folded into base/overlays (harpoon on `<leader>1-4`, tool-windows intellij-only, illuminate `]r`/`[r`), plugin centralization §4.4 (Tasks 9-11), LSP routing §4.3 (Task 8), testing §9 (Tasks 1,12). Docs §8 → **Plan 2 (separate)**. Note: separate vscode/intellij modes eliminate the old cross-IDE conflict handling (§7 now "mode independence").
 - **Deferred to Plan 2 (docs):** `docs/keybindings.md` — depends on final bindings settled here.
 - **Known simplifications:** which-key groups are not torn down on switch (harmless labels); treesitter incremental-selection remains unconfigured (documented opt-in, not bound); grug-far localleader already set in `options.lua`.

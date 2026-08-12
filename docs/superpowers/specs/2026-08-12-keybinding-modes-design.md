@@ -22,13 +22,16 @@ dead bindings adding noise.
 
 ## 2. Goal
 
-Replace the ad-hoc keymap layer with **three coherent, switchable schemes**:
+Replace the ad-hoc keymap layer with **four coherent, switchable schemes**:
 
 1. **Classic** — traditional vim-native / LazyVim-canonical.
 2. **Consistent** — one mnemonic rule: `<leader>` + category + verb, fully
    discoverable via which-key.
-3. **Editor** — full IDE emulation carrying **both** IntelliJ and VS Code
-   keymaps at once.
+3. **VS Code** — pure emulation of VS Code's default keymap.
+4. **IntelliJ** — pure emulation of IntelliJ IDEA's default keymap.
+
+(VS Code and IntelliJ are separate modes, not one combined "editor" mode — each
+is self-contained, so their keys never collide.)
 
 Schemes are **switchable live inside the editor** (`:KeymapMode`), with the
 choice persisted across restarts. A comprehensive `docs/keybindings.md` teaches
@@ -38,8 +41,8 @@ how to drive Neovim and documents every binding and plugin.
 
 - No per-language or per-project scheme overrides. One global active mode.
 - No GUI/settings panel beyond the `:KeymapMode` command + picker.
-- No attempt to make IntelliJ and VS Code bindings *both* win when they collide
-  — a documented precedence rule resolves conflicts (§7).
+- No combined IDE mode — VS Code and IntelliJ are separate, self-contained
+  modes, so their keys never coexist and no precedence rule is needed.
 - Not touching option/plugin *behavior* — only where keybindings are declared.
 
 ## 4. Architecture
@@ -53,7 +56,8 @@ lua/keymaps/
   base.lua        -- universal bindings present in ALL modes
   classic.lua     -- vim-native overlay
   consistent.lua  -- mnemonic leader-tree overlay
-  editor.lua      -- IntelliJ + VS Code overlay
+  vscode.lua      -- VS Code emulation overlay
+  intellij.lua    -- IntelliJ emulation overlay
 ```
 
 `lua/core/keymaps.lua` is deleted; `lua/core/init.lua` requires
@@ -153,7 +157,7 @@ live in base. Comment toggle stays `gcc`/`gc` (native) in base, with terminal
 > honors `]b`/`[b`. If `<S-h>`/`<S-l>` conflicts with a future need it can move to
 > an overlay.
 
-## 6. The three schemes
+## 6. The four schemes
 
 ### 6.1 Classic (vim-native)
 
@@ -245,65 +249,84 @@ under their category prefix (`<leader>xn`/`<leader>xp` next/prev, `<leader>tt`
 test-nearest, `<leader>db` breakpoint, `<leader>ff` find-files, etc.). Full table
 in implementation.
 
-### 6.3 Editor (IntelliJ + VS Code)
+### 6.3 VS Code (`vscode` mode)
 
-Carries both keymaps. IntelliJ column is the mac-primary set the current config
-already leans on; VS Code column adds the F-key/`Cmd`-based muscle memory. Both
-map to the same action **unless they collide** (§7).
+A pure emulation of VS Code's default keymap — no IntelliJ keys. Each mode is
+self-contained, so there are **no cross-IDE conflicts** to resolve. mac + win/
+linux literals are picked at load via `vim.fn.has("mac")`; the table shows mac,
+with the win/linux variant in parentheses where it differs structurally.
 
-| Action | IntelliJ (mac) | VS Code (mac) |
-|---|---|---|
-| Goto definition | `<D-b>` | `<F12>` |
-| Goto implementation | `<D-A-b>` | `<D-F12>` |
-| Goto type declaration | `<D-S-b>` | — |
-| Find usages / references | `<A-F7>` | `<S-F12>` |
-| Peek definition | `<A-Space>` | `<A-F12>` |
-| Hover / quick doc | `<F1>` | `<D-k><D-i>` |
-| Rename | `<S-F6>` | `<F2>` → **conflict, see §7** |
-| Code action / intention | `<A-CR>` | `<D-.>` |
-| Reformat | `<D-A-l>` | `<S-A-f>` |
-| Optimize imports | `<C-A-o>` | `<S-A-o>` |
-| Next / prev error | `<F2>` / `<S-F2>` | `<F8>` / `<S-F8>` → **conflict** |
-| Find files / go to file | `<D-S-o>` | `<D-p>` |
-| Search everywhere | `<D-S-a>` (single chord, not double-shift) | `<D-S-p>` (command palette) |
-| Recent files | `<D-e>` | — |
-| File structure / symbols | `<D-F12>` | `<D-S-o>` |
-| Find in files | `<D-S-f>` | `<D-S-f>` (same) |
-| Run | `<C-r>` | `<C-F5>` |
-| Debug | `<C-d>` | `<F5>` |
-| Stop | `<D-F2>` | `<S-F5>` |
-| Step over / into / out | `<F8>` / `<F7>` / `<S-F8>` | `<F10>` / `<F11>` / `<S-F11>` |
-| Toggle breakpoint | `<D-F8>` | `<F9>` |
-| Tool window: project | `<D-1>` | — |
-| Tool window: VCS/git | `<D-9>` | `<C-S-g>` |
-| Terminal | `<A-F12>` | `` <C-`> `` |
-| Comment line | `<D-/>` | `<D-/>` (same) |
-| Duplicate line | `<D-d>` | — |
-| Commit | `<D-k>` | — |
+| Action | VS Code (mac / win-linux) |
+|---|---|
+| Goto definition | `<F12>` |
+| Peek definition | `<A-F12>` |
+| Goto implementations | `<D-F12>` / `<C-F12>` |
+| References | `<S-F12>` |
+| Hover | `<D-k><D-i>` / `<C-k><C-i>` |
+| Rename | `<F2>` |
+| Quick fix (code action) | `<D-.>` / `<C-.>` |
+| Format document | `<S-A-f>` |
+| Organize imports | `<S-A-o>` |
+| Go to file (quick open) | `<D-p>` / `<C-p>` |
+| Command palette | `<D-S-p>` / `<C-S-p>` |
+| Symbols in file | `<D-S-o>` / `<C-S-o>` |
+| Find in files | `<D-S-f>` / `<C-S-f>` |
+| Next / prev problem | `<F8>` / `<S-F8>` |
+| Toggle sidebar (explorer) | `<D-b>` / `<C-b>` |
+| Toggle terminal | `` <C-`> `` |
+| Toggle source control | `<C-S-g>` |
+| Start / continue debug | `<F5>` |
+| Toggle breakpoint | `<F9>` |
+| Step over / into / out | `<F10>` / `<F11>` / `<S-F11>` |
+| Comment line | `<D-/>` / `<C-/>` |
+| Focus editor group 1/2/3 | `<D-1>`/`<D-2>`/`<D-3>` (mac), `<C-1..3>` (win/linux) |
 
-Windows/Linux variants (`<C-b>`, `<A-F7>`, `<C-A-l>`, `<A-1>`, …) are generated
-from the same table — the implementation stores both and picks by
-`vim.fn.has("mac")`. Full mac + win/linux tables live in the implementation plan.
+### 6.4 IntelliJ (`intellij` mode)
 
-## 7. Editor-mode conflict resolution
+A pure emulation of IntelliJ IDEA's default keymap — no VS Code keys. Signature
+IntelliJ concepts (tool-window numbers, find-usages, intentions) bind directly.
 
-When IntelliJ and VS Code assign the **same key to different actions**,
-**IntelliJ wins** (the user's daily driver and the config's existing lean). The
-VS Code action keeps only its non-colliding key. Every conflict is documented in
-`docs/keybindings.md`.
+| Action | IntelliJ (mac / win-linux) |
+|---|---|
+| Goto definition | `<D-b>` / `<C-b>` |
+| Goto implementation | `<D-A-b>` / `<C-A-b>` |
+| Goto type declaration | `<D-S-b>` / `<C-S-b>` |
+| Find usages | `<A-F7>` |
+| Quick definition (peek) | `<A-Space>` |
+| Quick doc (hover) | `<F1>` |
+| Rename | `<S-F6>` |
+| Intention / quick fix | `<A-CR>` |
+| Reformat code | `<D-A-l>` / `<C-A-l>` |
+| Optimize imports | `<C-A-o>` |
+| Next / prev error | `<F2>` / `<S-F2>` |
+| Go to class / file | `<D-o>` / `<C-n>`, `<D-S-o>` / `<C-S-N>` |
+| Symbols | `<D-A-o>` / `<C-A-S-N>` |
+| Recent files | `<D-e>` / `<C-e>` |
+| File structure | `<D-F12>` / `<C-F12>` |
+| Find in files | `<D-S-f>` / `<C-S-f>` |
+| Run | `<S-F10>` |
+| Debug | `<S-F9>` |
+| Step over / into / out | `<F8>` / `<F7>` / `<S-F8>` |
+| Toggle breakpoint | `<D-F8>` / `<C-F8>` |
+| Tool windows 1–8 | `<leader>1`–`<leader>8` (project/…/version-control) |
+| Terminal | `<A-F12>` |
+| Comment line | `<D-/>` / `<C-/>` |
+| Duplicate line | `<D-d>` / `<C-d>` |
+| Commit / git | `<D-k>` / `<C-k>` |
 
-Known conflicts (mac):
+> IntelliJ Run/Debug on mac are `⌃R`/`⌃D`, which shadow vim redo / half-page-down.
+> This mode uses the win/linux `<S-F10>`/`<S-F9>` on **both** platforms to avoid
+> shadowing vim keys — the one deliberate deviation from mac-literal fidelity.
+> Tool-window number focus (`<leader>1-8`) is IntelliJ's signature and lives only
+> in this mode (classic/consistent use `<leader>1-4` for harpoon; §12).
 
-| Key | IntelliJ action (wins) | VS Code action (loses this key; alt binding) |
-|---|---|---|
-| `<F2>` | Next error | Rename (still on `<S-F6>`) |
-| `<S-F2>` | Prev error | — |
-| `<F8>` | Step over | Next problem (still on IntelliJ `<F2>`) |
-| `<S-F8>` | Step out | Prev problem (still on `<S-F2>`) |
-| `<D-b>` | Goto definition | Toggle sidebar (use `<leader>e`) |
-| `<D-d>` | Duplicate line | Add selection to next match (unbound; use `<leader>` multicursor if added) |
-| `<D-1>` | Tool window: project | Focus editor group 1 (unbound) |
-| `<D-r>` | Replace | Run w/o debug (still on `<C-F5>`) |
+## 7. Mode independence (no cross-IDE conflicts)
+
+`vscode` and `intellij` are **separate, self-contained modes**. Because only one
+overlay is ever active, IntelliJ and VS Code keys never coexist, so the earlier
+"IntelliJ-wins" precedence rule is unnecessary and removed. The only conflicts
+left to manage are between an overlay and the shared base / vim built-ins, and
+between plugin defaults — handled in §12.
 
 ## 8. Documentation deliverable — `docs/keybindings.md`
 
@@ -323,11 +346,11 @@ Before writing, research each source and cite it:
 1. **How to drive Neovim** — modal editing primer: normal/insert/visual, motions
    + operators + text objects, the "verb-noun" grammar, registers/marks/macros,
    windows/splits/tabs, folds, quickfix/location list. *The main way to use nvim.*
-2. **The three modes** — what each is for, how to switch (`:KeymapMode`), how
+2. **The four modes** — what each is for, how to switch (`:KeymapMode`), how
    persistence works, how to pick one.
 3. **Base bindings** — the always-on universal set (§5), explained.
 4. **Per-mode reference** — full binding tables for classic / consistent /
-   editor, each with a one-line "what it's for".
+   vscode / intellij, each with a one-line "what it's for".
 5. **Per-plugin sections** — one section **per plugin plus the Neovim base**,
    each covering: what the plugin does, its bindings in each mode, and a short
    workflow. Plugins to document (all of them):
@@ -349,7 +372,7 @@ Before writing, research each source and cite it:
 ## 9. Testing / verification
 
 - **Smoke test** (`scripts/smoke.sh`): headless-load each mode
-  (`:KeymapMode classic|consistent|editor`) and assert no Lua errors, key maps
+  (`:KeymapMode classic|consistent|vscode|intellij`) and assert no Lua errors, key maps
   present via `nvim_get_keymap`, and clean teardown (a signature key from mode A
   is gone after switching to mode B).
 - **LSP re-apply**: with a buffer attached, switch modes and assert buffer-local
@@ -380,7 +403,9 @@ vim-visual-multi multicursor, LSP incoming/outgoing calls, and workspace symbols
 Baseline is Neovim **0.12.4**, which ships the `gr*` LSP defaults
 (`grr`/`gra`/`grn`/`gri`/`grt`/`gO`/`grx`) and `]d`/`[d`/`]D`/`[D` diagnostics. The
 manager's scheme maps override or complement these deliberately (e.g. classic
-rebinds to short `gd`/`gr`; consistent routes everything through `<leader>` trees).
+rebinds to short `gd`/`gr`; consistent routes everything through `<leader>` trees;
+vscode/intellij bind their native IDE keys). The four modes are `classic`,
+`consistent`, `vscode`, `intellij`.
 
 ## 12. Binding conflicts & resolutions
 
@@ -389,7 +414,7 @@ Resolutions for collisions the capability research surfaced:
 | Conflict | Resolution |
 |---|---|
 | harpoon default slot keys `<C-h/j/k/l>` vs **base pane-nav** `<C-h/j/k/l>` | Pane-nav wins (base). Harpoon slots → `<leader>1`–`<leader>4` in **classic**/**consistent**. |
-| `<leader>1`–`<leader>8` tool-window focus (IntelliJ-style) vs harpoon slots | Tool-window-number focus is an **IDE concept** → lives in **editor** mode only. classic/consistent use `<leader>1`–`4` for harpoon; no tool-window numbers there. |
+| `<leader>1`–`<leader>8` tool-window focus (IntelliJ-style) vs harpoon slots | Tool-window-number focus is IntelliJ's signature → lives in **intellij** mode only. classic/consistent use `<leader>1`–`4` for harpoon; vscode uses its native `<D-1..3>` editor groups. |
 | vim-illuminate suggests `]]`/`[[` (collides with native section / aerial parent motion) | Bind reference-nav to **`]r`/`[r`** instead; leave `]]`/`[[` native. |
 | treesitter incremental-selection README keys `grn`/`grc`/`grm` collide with LSP `grn` | Not configured today. If added: **`<C-space>`** init/expand, **`<BS>`** shrink — off the `gr*` namespace. |
 | aerial `{`/`}` symbol motion vs default `{`/`}` paragraph motion | Bind aerial motion **buffer-local in code buffers only** (via LspAttach-adjacent autocmd), preserving `{`/`}` elsewhere. |
@@ -398,4 +423,3 @@ Resolutions for collisions the capability research surfaced:
 
 These resolutions are folded into the scheme tables during implementation
 (writing-plans).
-```

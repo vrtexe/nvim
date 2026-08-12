@@ -205,7 +205,7 @@ Source: `:help lsp-defaults`, `diagnostic-defaults`, `fold-commands`, `CTRL-W`,
 
 ## Coverage note
 
-Each scheme (classic / consistent / editor) must provide a binding for every
+Each scheme (classic / consistent / vscode / intellij) must provide a binding for every
 **[cur]** capability and SHOULD expose the high-value **[NEW]** ones
 (snacks git/lsp pickers, gitsigns toggles + `ih`, dap hover/eval, neotest
 debug-nearest + output-panel + jump-failed, ufo peek, todo nav, illuminate
