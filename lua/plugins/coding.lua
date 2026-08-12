@@ -27,9 +27,7 @@ return {
   {
     "echasnovski/mini.bufremove",
     version = "*",
-    keys = {
-      { "<leader>bd", function() require("mini.bufremove").delete(0, false) end, desc = "Close buffer (keep layout)" },
-    },
+    lazy = true,
   },
 
   -- Modern code folding (treesitter/indent providers). Fold options live in
@@ -38,10 +36,6 @@ return {
     "kevinhwang91/nvim-ufo",
     dependencies = { "kevinhwang91/promise-async" },
     event = "BufReadPost",
-    keys = {
-      { "zR", function() require("ufo").openAllFolds() end, desc = "Open all folds" },
-      { "zM", function() require("ufo").closeAllFolds() end, desc = "Close all folds" },
-    },
     config = function()
       require("ufo").setup({
         provider_selector = function() return { "treesitter", "indent" } end,
@@ -65,10 +59,7 @@ return {
   -- Project-wide find & replace UI (VS Code search panel).
   {
     "MagicDuck/grug-far.nvim",
-    cmd = "GrugFar",
-    keys = {
-      { "<leader>sr", function() require("grug-far").open() end, desc = "Search & replace (project)" },
-    },
+    cmd = { "GrugFar", "GrugFarWithin" },
     opts = {},
   },
 }

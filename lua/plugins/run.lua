@@ -9,11 +9,7 @@ return {
       "nvim-neotest/neotest-go",
       "mrcjkb/rustaceanvim",
     },
-    keys = {
-      { "<leader>tt", function() require("neotest").run.run() end, desc = "Test nearest" },
-      { "<leader>tf", function() require("neotest").run.run(vim.fn.expand("%")) end, desc = "Test file" },
-      { "<leader>ts", function() require("neotest").summary.toggle() end, desc = "Test summary" },
-    },
+    lazy = true,
     config = function()
       require("neotest").setup({
         adapters = {
@@ -27,11 +23,7 @@ return {
 
   {
     "stevearc/overseer.nvim",
-    cmd = { "OverseerRun", "OverseerToggle" },
-    keys = {
-      { "<leader>rr", "<cmd>OverseerRun<cr>", desc = "Run task/build" },
-      { "<leader>rl", "<cmd>OverseerToggle<cr>", desc = "Task list" },
-    },
+    cmd = { "OverseerRun", "OverseerToggle", "OverseerRunCmd", "OverseerOpen" },
     opts = {},
   },
 }

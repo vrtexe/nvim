@@ -4,7 +4,6 @@ return {
     branch = "v3.x",
     cmd = "Neotree",
     dependencies = { "nvim-lua/plenary.nvim", "nvim-tree/nvim-web-devicons", "MunifTanjim/nui.nvim" },
-    keys = { { "<leader>e", "<cmd>Neotree toggle<cr>", desc = "File explorer" } },
     init = function()
       -- VS Code-style: launching on a directory (`nvim .`) cds into the project
       -- and opens the tree as a left sidebar. Deferred so it runs after startup.

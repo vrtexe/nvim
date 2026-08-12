@@ -19,7 +19,7 @@ remnants=$(ls "$LAZY" 2>/dev/null | grep -E '\.(cloning|updating)$' || true)
 count=$(ls "$LAZY" 2>/dev/null | grep -vE '\.(cloning|updating)$' | wc -l | tr -d ' ')
 echo "installed plugin dirs: $count"
 if [ -n "$remnants" ]; then echo "FAIL: incomplete clones: $remnants"; fail=1; else echo "NO-REMNANTS"; fi
-for p in ibl telescope.nvim blink.cmp nvim-lspconfig github-nvim-theme neo-tree.nvim nvim-dap neotest; do
+for p in ibl blink.cmp nvim-lspconfig github-nvim-theme neo-tree.nvim nvim-dap neotest; do
   [ -d "$LAZY/$p" ] && echo "  ok $p" || { echo "  FAIL missing $p"; fail=1; }
 done
 
