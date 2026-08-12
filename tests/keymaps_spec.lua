@@ -15,6 +15,16 @@ assert(km.current() == "classic", "default mode is classic, got " .. tostring(km
 assert(mapped("n", "<Esc>"), "base <Esc> applied")
 assert(mapped("n", "gh"), "classic marker applied")
 
+-- base coverage (present in every mode)
+for _, pair in ipairs({
+  { "n", "<C-h>" }, { "n", "<C-l>" }, { "n", "<C-s>" }, { "v", "<C-c>" },
+  { "n", "<A-Up>" }, { "n", "<S-l>" }, { "n", "<S-h>" }, { "n", "<C-\\>" },
+  { "n", "<leader>ut" }, { "n", "<leader>uh" }, { "n", "s" },
+  { "n", "<leader>wv" }, { "n", "<leader>qs" },
+}) do
+  assert(mapped(pair[1], pair[2]), "base map missing: " .. pair[1] .. " " .. pair[2])
+end
+
 -- 3. switch() tears down previous overlay and applies the new one
 assert(km.switch("vscode") == true, "switch to vscode returns true")
 assert(km.current() == "vscode", "current is vscode")
