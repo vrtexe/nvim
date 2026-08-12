@@ -6,6 +6,9 @@ local km = require("keymaps")
 -- helper: is (mode, lhs) currently mapped globally?
 local function mapped(mode, lhs) return vim.fn.maparg(lhs, mode) ~= "" end
 
+local is_mac = vim.fn.has("mac") == 1
+local function mac_key(m, w) return { "n", is_mac and m or w } end
+
 -- ensure a clean slate: a leftover persisted mode from a prior run (or a
 -- prior switch() call in this same run) must not affect the default-mode
 -- assertion below.
@@ -42,18 +45,18 @@ end
 -- 3. switch() tears down previous overlay and applies the new one
 assert(km.switch("vscode") == true, "switch to vscode returns true")
 assert(km.current() == "vscode", "current is vscode")
-assert(mapped("n", "<F17>"), "vscode marker applied after switch")
+assert(mapped("n", "<F12>"), "vscode marker applied after switch")
 assert(not mapped("n", "<leader>ff"), "classic marker torn down after switch")
 assert(mapped("n", "<Esc>"), "base survives switch")
 
 -- 4. switch to consistent
 assert(km.switch("consistent") == true, "switch to consistent")
 assert(mapped("n", "<leader>cd"), "consistent marker applied")
-assert(not mapped("n", "<F17>"), "vscode marker torn down")
+assert(not mapped("n", "<F12>"), "vscode marker torn down")
 
 -- 4b. switch to intellij applies its marker
 assert(km.switch("intellij") == true, "switch to intellij")
-assert(mapped("n", "<F18>"), "intellij marker applied")
+assert(mapped("n", "<A-F7>"), "intellij marker applied")
 
 -- 5. invalid mode rejected
 assert(km.switch("nonsense") == false, "invalid mode returns false")
@@ -133,5 +136,39 @@ for _, pair in ipairs({
   assert(mapped(pair[1], pair[2]), "consistent map missing: " .. pair[1] .. " " .. pair[2])
 end
 assert(not mapped("n", "gd"), "consistent does not bind vim-native gd (torn down)")
+
+-- 11. vscode scheme: VS Code default-keymap emulation (spec §6.3)
+km.switch("vscode")
+for _, pair in ipairs({
+  { "n", "<F12>" },
+  { "n", "<S-F12>" },
+  { "n", "<F2>" },
+  { "n", "<F5>" },
+  { "n", "<F9>" },
+  { "n", "<F10>" },
+  mac_key("<D-b>", "<C-b>"),
+  mac_key("<D-p>", "<C-p>"),
+  mac_key("<D-.>", "<C-.>"),
+}) do
+  assert(mapped(pair[1], pair[2]), "vscode map missing: " .. pair[1] .. " " .. pair[2])
+end
+assert(not mapped("n", "gd"), "vscode does not bind vim-native gd")
+
+-- 12. intellij scheme: IntelliJ default-keymap emulation (spec §6.4)
+km.switch("intellij")
+for _, pair in ipairs({
+  mac_key("<D-b>", "<C-b>"),
+  { "n", "<A-F7>" },
+  { "n", "<S-F6>" },
+  { "n", "<A-CR>" },
+  { "n", "<F8>" },
+  { "n", "<F7>" },
+  { "n", "<F2>" },
+  { "n", "<S-F10>" },
+  { "n", "<S-F9>" },
+  { "n", "<leader>1" },
+}) do
+  assert(mapped(pair[1], pair[2]), "intellij map missing: " .. pair[1] .. " " .. pair[2])
+end
 
 io.stdout:write("KEYMAPS-TESTS-PASS\n")
