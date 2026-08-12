@@ -40,5 +40,9 @@ echo "${clients:-LSPCLIENTS=?}"
 if echo "$clients" | grep -qE "LSPCLIENTS=[1-9]"; then echo "LSP-OK"; else
   echo "LSP-SOFT: no client attached yet (server may still be installing — not fatal)"; fi
 
+echo "== 6. Keymap modes cycle cleanly =="
+modes=$(nvim --headless "+lua local km=require('keymaps'); for _,m in ipairs({'classic','consistent','vscode','intellij','classic'}) do assert(km.switch(m), 'switch '..m) end; io.stdout:write('MODES-CYCLE-OK\n')" "+qa" 2>&1)
+echo "$modes" | grep -q "MODES-CYCLE-OK" && echo "MODES-OK" || { echo "FAIL: mode cycle"; fail=1; }
+
 echo "== SMOKE DONE (fail=$fail) =="
 exit $fail
