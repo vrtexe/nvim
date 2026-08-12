@@ -89,7 +89,7 @@ return {
     { "n", "<leader>gb", function() require("gitsigns").toggle_current_line_blame() end, "Toggle line blame" },
     { "n", "<leader>gg", "<cmd>LazyGit<cr>", "LazyGit" },
     { "n", "<leader>gd", "<cmd>DiffviewOpen<cr>", "Diff view" },
-    { "n", "<leader>gh", "<cmd>DiffviewFileHistory %<cr>", "File history" },
+    { "n", "<leader>gF", "<cmd>DiffviewFileHistory %<cr>", "File history" },
     { "n", "<leader>gs", function() require("snacks").picker.git_status() end, "Git status" },
     { "n", "<leader>gl", function() require("snacks").picker.git_log() end, "Git log" },
 
@@ -160,6 +160,8 @@ return {
     { "v", "<leader>as", "<cmd>ClaudeCodeSend<cr>", "Send selection to Claude" },
     { "n", "<leader>aa", "<cmd>ClaudeCodeDiffAccept<cr>", "Accept Claude diff" },
     { "n", "<leader>ad", "<cmd>ClaudeCodeDiffDeny<cr>", "Reject Claude diff" },
+    { "n", "<leader>aC", "<cmd>ClaudeCode --continue<cr>", "Continue last session" },
+    { "n", "<leader>am", "<cmd>ClaudeCodeSelectModel<cr>", "Select Claude model" },
   },
   lsp = {
     -- buffer-local, applied on LspAttach (Task 8). Peek references via glance.

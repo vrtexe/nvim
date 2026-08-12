@@ -1,15 +1,5 @@
 -- Universal, idiom-neutral bindings present in ALL modes (spec §5).
 -- Personality verbs (goto-def, rename, find, etc.) live in the overlays.
-local function focus_terminal()
-  for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
-    if vim.bo[vim.api.nvim_win_get_buf(win)].buftype == "terminal" then
-      vim.api.nvim_set_current_win(win)
-      return
-    end
-  end
-  vim.cmd("ToggleTerm")
-end
-
 return {
   name = "base",
   maps = {
@@ -51,6 +41,7 @@ return {
     { { "n", "t" }, "<M-1>", "<cmd>1ToggleTerm direction=horizontal<cr>", "Terminal 1" },
     { { "n", "t" }, "<M-2>", "<cmd>2ToggleTerm direction=horizontal<cr>", "Terminal 2" },
     { { "n", "t" }, "<M-3>", "<cmd>3ToggleTerm direction=horizontal<cr>", "Terminal 3" },
+    { { "n", "t" }, "<M-F12>", "<cmd>ToggleTerm<cr>", "Terminal (Option+F12)" },
 
     -- Flash jump
     { { "n", "x", "o" }, "s", function() require("flash").jump() end, "Flash jump" },

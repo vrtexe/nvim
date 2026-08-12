@@ -114,6 +114,8 @@ return {
     { "v", "<leader>as", "<cmd>ClaudeCodeSend<cr>", "Send selection" },
     { "n", "<leader>aa", "<cmd>ClaudeCodeDiffAccept<cr>", "Accept diff" },
     { "n", "<leader>ad", "<cmd>ClaudeCodeDiffDeny<cr>", "Reject diff" },
+    { "n", "<leader>aC", "<cmd>ClaudeCode --continue<cr>", "Continue last session" },
+    { "n", "<leader>am", "<cmd>ClaudeCodeSelectModel<cr>", "Select Claude model" },
 
     -- harpoon (<leader>1-4 slots, add/menu under <leader>h — reuse classic feel)
     { "n", "<leader>1", function() require("harpoon"):list():select(1) end, "Harpoon 1" },

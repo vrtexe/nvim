@@ -1,2 +1,4 @@
 require("core.options")
-require("keymaps").setup()
+if not vim.g.vscode then
+  require("keymaps").setup()
+end
