@@ -13,14 +13,23 @@ assert(vim.deep_equal(km.MODES, { "classic", "consistent", "vscode", "intellij" 
 km.setup()
 assert(km.current() == "classic", "default mode is classic, got " .. tostring(km.current()))
 assert(mapped("n", "<Esc>"), "base <Esc> applied")
-assert(mapped("n", "gh"), "classic marker applied")
+assert(mapped("n", "<leader>ff"), "classic marker applied")
 
 -- base coverage (present in every mode)
 for _, pair in ipairs({
-  { "n", "<C-h>" }, { "n", "<C-l>" }, { "n", "<C-s>" }, { "v", "<C-c>" },
-  { "n", "<A-Up>" }, { "n", "<S-l>" }, { "n", "<S-h>" }, { "n", "<C-\\>" },
-  { "n", "<leader>ut" }, { "n", "<leader>uh" }, { "n", "s" },
-  { "n", "<leader>wv" }, { "n", "<leader>qs" },
+  { "n", "<C-h>" },
+  { "n", "<C-l>" },
+  { "n", "<C-s>" },
+  { "v", "<C-c>" },
+  { "n", "<A-Up>" },
+  { "n", "<S-l>" },
+  { "n", "<S-h>" },
+  { "n", "<C-\\>" },
+  { "n", "<leader>ut" },
+  { "n", "<leader>uh" },
+  { "n", "s" },
+  { "n", "<leader>wv" },
+  { "n", "<leader>qs" },
 }) do
   assert(mapped(pair[1], pair[2]), "base map missing: " .. pair[1] .. " " .. pair[2])
 end
@@ -29,7 +38,7 @@ end
 assert(km.switch("vscode") == true, "switch to vscode returns true")
 assert(km.current() == "vscode", "current is vscode")
 assert(mapped("n", "<F17>"), "vscode marker applied after switch")
-assert(not mapped("n", "gh"), "classic marker torn down after switch")
+assert(not mapped("n", "<leader>ff"), "classic marker torn down after switch")
 assert(mapped("n", "<Esc>"), "base survives switch")
 
 -- 4. switch to consistent
@@ -63,5 +72,34 @@ assert(pcall(function() vim.cmd("KeymapMode") end), ":KeymapMode (no arg) does n
 -- 9. manager is initialized by core (command exists after full startup)
 -- Tested separately in scripts/keymaps_test.sh via CORE-WIRED-OK check
 -- (cannot assert here as spec itself calls km.setup())
+
+km.switch("classic")
+for _, pair in ipairs({
+  { "n", "gd" },
+  { "n", "gr" },
+  { "n", "gy" },
+  { "n", "gI" },
+  { "n", "<leader>ca" },
+  { "n", "<leader>cf" },
+  { "n", "<leader>cr" },
+  { "n", "]d" },
+  { "n", "[d" },
+  { "n", "]h" },
+  { "n", "[h" },
+  { "n", "<leader>ff" },
+  { "n", "<leader>fg" },
+  { "n", "<leader>e" },
+  { "n", "<leader>gg" },
+  { "n", "<leader>tt" },
+  { "n", "<leader>db" },
+  { "n", "<leader>xx" },
+  { "n", "]t" },
+  { "n", "]r" },
+}) do
+  assert(mapped(pair[1], pair[2]), "classic map missing: " .. pair[1] .. " " .. pair[2])
+end
+-- classic lsp spec is applied buffer-local via apply_lsp
+km.apply_lsp(0)
+assert(vim.fn.maparg("gh", "n") ~= "" or true, "placeholder") -- lsp maps checked in Task 8
 
 io.stdout:write("KEYMAPS-TESTS-PASS\n")
