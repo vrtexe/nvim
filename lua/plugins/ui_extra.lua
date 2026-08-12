@@ -16,7 +16,7 @@ return {
     enabled = full_ui,
     event = "VeryLazy",
     dependencies = { "tiagovla/scope.nvim" },
-    opts = { options = { diagnostics = "nvim_lsp", separator_style = "slant" } },
+    opts = { options = { diagnostics = "nvim_lsp", separator_style = "thick" } },
     keys = {
       { "<S-l>", "<cmd>BufferLineCycleNext<cr>", desc = "Next buffer/tab" },
       { "<S-h>", "<cmd>BufferLineCyclePrev<cr>", desc = "Prev buffer/tab" },

@@ -25,6 +25,12 @@ return {
       filesystem = {
         follow_current_file = { enabled = true },
         hijack_netrw_behavior = "open_current",
+        -- Show dotfiles by default (gitignored files stay hidden — toggle with H).
+        filtered_items = {
+          visible = true,
+          hide_dotfiles = false,
+          hide_gitignored = true,
+        },
       },
     },
   },
