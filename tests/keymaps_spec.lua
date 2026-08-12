@@ -50,4 +50,8 @@ assert(km.current() == "classic", ":KeymapMode classic switched")
 -- 8. pick() is callable without throwing (headless: vim.ui.select is a no-op)
 assert(pcall(function() vim.cmd("KeymapMode") end), ":KeymapMode (no arg) does not error")
 
+-- 9. manager is initialized by core (command exists after full startup)
+-- Tested separately in scripts/keymaps_test.sh via CORE-WIRED-OK check
+-- (cannot assert here as spec itself calls km.setup())
+
 io.stdout:write("KEYMAPS-TESTS-PASS\n")
