@@ -49,4 +49,54 @@ if not vim.g.vscode then
   map("n", "<leader>wt", "<cmd>tabnew<cr>", { desc = "New editor group (tab page)" })
   map("n", "<leader>wn", "gt", { remap = true, desc = "Next group" })
   map("n", "<leader>wp", "gT", { remap = true, desc = "Prev group" })
+
+  -- Tool-window focus (VS Code/IntelliJ style): jump straight to a panel.
+  map("n", "<leader>1", "<cmd>Neotree focus<cr>", { desc = "Focus file explorer" })
+  map("n", "<leader>2", function()
+    -- Jump to a visible terminal window in this tab page; else open one.
+    for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+      if vim.bo[vim.api.nvim_win_get_buf(win)].buftype == "terminal" then
+        vim.api.nvim_set_current_win(win)
+        return
+      end
+    end
+    vim.cmd("ToggleTerm")
+  end, { desc = "Focus terminal" })
+  -- <leader>3: back to the editor — focus a real file window (skip sidebars/
+  -- terminals/panels). Prefers the window you came from, else the first file window.
+  map("n", "<leader>3", function()
+    local prev = vim.fn.win_getid(vim.fn.winnr("#"))
+    if prev ~= 0 and vim.api.nvim_win_is_valid(prev) and vim.bo[vim.api.nvim_win_get_buf(prev)].buftype == "" then
+      vim.api.nvim_set_current_win(prev)
+      return
+    end
+    for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+      if vim.bo[vim.api.nvim_win_get_buf(win)].buftype == "" then
+        vim.api.nvim_set_current_win(win)
+        return
+      end
+    end
+  end, { desc = "Focus editor (current file)" })
+  map("n", "<leader>4", "<cmd>OverseerToggle<cr>", { desc = "Focus task runner (overseer)" })
+  map("n", "<leader>5", function()
+    require("dap") -- load nvim-dap first so its config has run dapui.setup()
+    require("dapui").toggle()
+  end, { desc = "Focus debug UI" })
+  map("n", "<leader>6", "<cmd>AerialToggle<cr>", { desc = "Focus outline (aerial)" })
+  map("n", "<leader>7", function() require("neotest").summary.toggle() end, { desc = "Focus tests (neotest)" })
+  map("n", "<leader>8", function()
+    local lib = require("diffview.lib")
+    if lib.get_current_view() then
+      vim.cmd("DiffviewClose")
+    else
+      vim.cmd("DiffviewOpen")
+    end
+  end, { desc = "Focus source control (diffview)" })
+
+  -- Toggle inlay hints (inferred types / param names) globally
+  map("n", "<leader>uh", function()
+    local on = vim.lsp.inlay_hint.is_enabled()
+    vim.lsp.inlay_hint.enable(not on)
+    vim.notify("Inlay hints " .. (on and "off" or "on"), vim.log.levels.INFO)
+  end, { desc = "Toggle inlay hints" })
 end

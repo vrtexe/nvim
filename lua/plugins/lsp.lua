@@ -68,9 +68,50 @@ return {
         })
       end
 
+      -- Inlay hints (inferred types, param names) are server-driven and mostly
+      -- opt-in per server. Enable the categories; the LspAttach hook below turns
+      -- rendering on for any client that supports textDocument/inlayHint.
+      vim.lsp.config("lua_ls", {
+        settings = { Lua = { hint = { enable = true, arrayIndex = "Disable" } } },
+      })
+      vim.lsp.config("gopls", {
+        settings = {
+          gopls = {
+            hints = {
+              assignVariableTypes = true,
+              compositeLiteralFields = true,
+              constantValues = true,
+              functionTypeParameters = true,
+              parameterNames = true,
+              rangeVariableTypes = true,
+            },
+          },
+        },
+      })
+      local ts_inlay = {
+        includeInlayParameterNameHints = "literals", -- "none" | "literals" | "all"
+        includeInlayParameterNameHintsWhenArgumentMatchesName = false,
+        includeInlayFunctionParameterTypeHints = true,
+        includeInlayVariableTypeHints = true,
+        includeInlayVariableTypeHintsWhenTypeMatchesName = false,
+        includeInlayPropertyDeclarationTypeHints = true,
+        includeInlayFunctionLikeReturnTypeHints = true,
+        includeInlayEnumMemberValueHints = true,
+      }
+      vim.lsp.config("ts_ls", {
+        settings = {
+          typescript = { inlayHints = ts_inlay },
+          javascript = { inlayHints = ts_inlay },
+        },
+      })
+
       vim.api.nvim_create_autocmd("LspAttach", {
         callback = function(ev)
           local b = ev.buf
+          local client = vim.lsp.get_client_by_id(ev.data.client_id)
+          if client and client:supports_method("textDocument/inlayHint") then
+            vim.lsp.inlay_hint.enable(true, { bufnr = b })
+          end
           -- Breadcrumbs (navic) are attached by barbecue (attach_navic=true).
           -- Attaching here too warns when a 2nd client (e.g. svelte + ts_ls) attaches.
           local function m(lhs, rhs, desc) vim.keymap.set("n", lhs, rhs, { buffer = b, desc = desc }) end
