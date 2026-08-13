@@ -60,11 +60,11 @@ Forgot a key? Press `<leader>` and pause — **which-key** pops up a live menu o
 
 ## 1. Open a project
 
-Launch `nvim` in a project directory (or bare `nvim`, then pick from the dashboard). If you launched bare, the dashboard (`dashboard-nvim`, "hyper" theme) lists recent projects and recent files — pick one, or press `<leader>fr` any time to open Telescope's recent-files list instead.
+Launch `nvim` in a project directory (or bare `nvim`, then pick from the dashboard). If you launched bare, the dashboard (`dashboard-nvim`, "hyper" theme) lists recent projects and recent files — pick one, or press `<leader>fr` any time to open the recent-files picker (snacks.nvim) instead.
 
 ## 2. Navigate
 
-- `<leader>ff` — fuzzy find files by name (Telescope).
+- `<leader>ff` — fuzzy find files by name (snacks.picker).
 - `<leader><leader>` — same find-files picker, "search everywhere" muscle memory.
 - `<leader>fg` — live grep across the project.
 - `<leader>o` — toggle the Aerial symbol outline for the current file (functions, classes, etc. — also feeds the winbar breadcrumb via barbecue/navic).
@@ -125,7 +125,7 @@ Launch `nvim` in a project directory (or bare `nvim`, then pick from the dashboa
   brew install lazygit ripgrep fd stylua
   ```
   - `lazygit` powers `<leader>gg`.
-  - `ripgrep` and `fd` make Telescope's find/grep pickers fast (and are used by some pickers directly).
+  - `ripgrep` and `fd` make the find/grep pickers (snacks.nvim) fast (and are used by some pickers directly).
   - `stylua` is the Lua formatter behind `Ctrl+Alt+L` for `.lua` files.
   - Node.js is assumed already present for `prettier`/`prettierd`/`eslint_d`.
   - The config degrades gracefully if any of these are missing — it just won't error, those specific features simply won't work until installed.
