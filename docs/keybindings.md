@@ -125,7 +125,7 @@ buffer/terminal management, clipboard, save) and never change when you switch.
 | `<Esc>` | Clear search highlight |
 | `<A-Up>` / `<A-Down>` | Move line/selection up / down |
 | `<C-c>` (visual) | Copy to system clipboard |
-| `<C-v>` (insert/visual) | Paste from system clipboard |
+| `<C-v>` (insert) | Paste from system clipboard (in visual, `p` already pastes it: `clipboard=unnamedplus`) |
 | `gcc` / `gc` (+ `<C-_>`, `<D-/>`) | Toggle comment (line / motion) |
 | `s` / `S` | Flash jump / Flash treesitter select |
 
@@ -158,7 +158,7 @@ Hover-doc (`K` in classic/consistent, `Cmd+K Cmd+I` / `F1` in the IDE modes) and
 | `gD` | Declaration | `<leader>ca` | Code action |
 | `gI` | Implementation | `<leader>cf` | Format |
 | `gy` | Type definition | `<leader>co` | Organize imports |
-| `gr` | References (peek) | `<leader>cs` | Symbols / outline |
+| `grr` | References (peek) | `<leader>cs` | Symbols / outline |
 | `K` | Hover / peek fold | `<leader>cd` | Line diagnostics |
 | `gK` | Signature help | `<leader>ci` / `<leader>cO` | Incoming / outgoing calls |
 
@@ -271,7 +271,7 @@ depends on the active mode (see §4). Display-only plugins are noted without key
 - **aerial.nvim** — code outline. Open with Symbols/Structure (`<leader>cs`,
   `<leader>6`, IntelliJ `Cmd+F12`). Inside: `{`/`}` prev/next symbol.
 - **glance.nvim** — VS Code-style peek window for references/definitions (the
-  `gr`, `Shift+F12`, `Alt+F7` bindings). In the peek: `j`/`k` move, `<CR>` jump,
+  `grr`, `Shift+F12`, `Alt+F7` bindings). In the peek: `j`/`k` move, `<CR>` jump,
   `v`/`s`/`t` open in split/vsplit/tab, `<C-q>` → quickfix.
 - **trouble.nvim** — the problems list (`<leader>xx` / `<leader>xb`). Also does
   symbols, LSP results, todos, quickfix. In-window: `<CR>` jump, `}`/`{` next/prev.
@@ -294,7 +294,6 @@ depends on the active mode (see §4). Display-only plugins are noted without key
 - **neo-tree** — file explorer (`<leader>e` / `<leader>fe` / `Cmd+B` sidebar /
   `<leader>1` in intellij). Inside: `<CR>` open, `a`/`d`/`r` add/delete/rename,
   `?` help.
-- **project.nvim** — auto-detects project roots; switch via `<leader>fp`.
 
 ### Git
 
@@ -312,7 +311,7 @@ depends on the active mode (see §4). Display-only plugins are noted without key
 - **overseer** — task runner. `<leader>rr` pick & run, `<leader>rl` task list,
   `<leader>rc` arbitrary shell command. Also `Shift+F10` (intellij) / part of
   `F5` flows.
-- **neotest** — test runner. `<leader>tt` nearest, `<leader>tf` file, `<leader>ts`
+- **neotest** — test runner (Jest, Go, Java/JUnit, Rust). `<leader>tt` nearest, `<leader>tf` file, `<leader>ts`
   summary panel, `<leader>to` output, `<leader>td` **debug** the nearest test (via
   dap), `]f`/`[f` jump between failures.
 - **nvim-dap + dap-ui** — debugger. Breakpoint, continue, step over/into/out,
@@ -385,7 +384,7 @@ and reject with `:q` inside the diff.
 ## 7. Workflows
 
 **Understand a symbol → change it.**
-`gd` jump to definition → `<C-o>` jump back → `gr` peek references →
+`gd` jump to definition → `<C-o>` jump back → `grr` peek references →
 `<leader>cr` rename across the project → `<leader>ca` apply a code action →
 `<leader>cf` format. (In `vscode`: `F12` → `Shift+F12` → `F2` → `Cmd+.` →
 `Shift+Alt+F`.)

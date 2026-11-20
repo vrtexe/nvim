@@ -36,7 +36,7 @@ Everything from here down describes the **terminal** home.
 | `Ctrl+Alt+O` | Organize imports |
 | `gd` / `F4` | Go to definition |
 | `gi` | Go to implementation |
-| `gr` / `Alt+F7` | Find references |
+| `grr` / `Alt+F7` | Find references |
 | `K` | Hover docs |
 | `Shift+F6` | Rename symbol |
 | `<leader>xx` / `<leader>xX` | Problems: all / current buffer |
@@ -92,14 +92,14 @@ Launch `nvim` in a project directory (or bare `nvim`, then pick from the dashboa
 - `Ctrl+Alt+L` (normal or visual) reformats the buffer/selection via conform.nvim — stylua for Lua, prettier/prettierd for JS/TS/web, gofmt, rustfmt, etc. (Format-on-save is intentionally off — this is a deliberate keypress.)
 - Diagnostics show inline (virtual text + gutter signs) as `nvim-lint` and your LSP servers report issues.
 - Put the cursor on a squiggly and press `Alt+Enter` for a code action / quick fix menu; `Ctrl+Alt+O` organizes imports specifically.
-- `gd`/`F4` go to definition, `gi` go to implementation, `gr`/`Alt+F7` find references, `K` shows hover docs, `Shift+F6` renames the symbol project-wide.
+- `gd`/`F4` go to definition, `gi` go to implementation, `grr`/`Alt+F7` find references, `K` shows hover docs, `Shift+F6` renames the symbol project-wide.
 - `<leader>xx` opens the Trouble "Problems" panel for the whole project; `<leader>xX` scopes it to the current buffer.
 
 ## 6. Run, test, build, debug
 
 - `<leader>tt` runs the nearest test (neotest, with Jest/Go/Rust adapters wired in); `<leader>tf` runs every test in the current file; `<leader>ts` toggles the test summary/tree panel.
 - `<leader>rr` runs a task via Overseer (build/lint/whatever task you pick); `<leader>rl` opens the task list to watch/rerun past tasks.
-- `<leader>db` toggles a breakpoint on the current line; `<leader>dc` starts/continues a debug session (DAP, via codelldb/delve depending on language). The DAP UI opens automatically when a session launches or attaches.
+- `<leader>db` toggles a breakpoint on the current line; `<leader>dc` starts/continues a debug session (DAP, via codelldb, delve or java-debug depending on language). The DAP UI opens automatically when a session launches or attaches.
 - While debugging: `F7` steps into, `F8` steps over, `Shift+F8` steps out.
 
 ## 7. Layout
@@ -118,7 +118,7 @@ Launch `nvim` in a project directory (or bare `nvim`, then pick from the dashboa
 ## 9. First-run notes
 
 - **Plugins**: on the very first `nvim` launch, lazy.nvim bootstraps itself and installs all 49 plugins automatically. If anything looks incomplete afterward, run `:Lazy sync`.
-- **LSP servers/formatters/linters**: run `:Mason` to open the manager UI and see what's installed. `mason-lspconfig` auto-installs the configured servers (`lua_ls`, `ts_ls`, `svelte`, `tailwindcss`, `html`, `cssls`, `jsonls`, `eslint`, `gopls`, `clangd`, `kotlin_language_server`, `dockerls`, `sqls`) the first time you open a matching filetype — this can take a minute on first use, so don't panic if `gd`/`K` don't respond instantly on a brand new file type.
+- **LSP servers/formatters/linters**: run `:Mason` to open the manager UI and see what's installed. `mason-lspconfig` auto-installs the configured servers (`lua_ls`, `ts_ls`, `svelte`, `tailwindcss`, `html`, `cssls`, `jsonls`, `eslint`, `gopls`, `clangd`, `kotlin_language_server`, `dockerls`, `sqls`, `bashls`, `pyright`; `tailwindcss` only attaches in projects with a Tailwind config or `tailwindcss` in `package.json`) the first time you open a matching filetype — this can take a minute on first use, so don't panic if `gd`/`K` don't respond instantly on a brand new file type.
 - **Copilot**: run `:Copilot auth` once to sign in before ghost-text suggestions start appearing.
 - **External CLIs** (not bundled — install via Homebrew):
   ```
@@ -127,7 +127,8 @@ Launch `nvim` in a project directory (or bare `nvim`, then pick from the dashboa
   - `lazygit` powers `<leader>gg`.
   - `ripgrep` and `fd` make the find/grep pickers (snacks.nvim) fast (and are used by some pickers directly).
   - `stylua` is the Lua formatter behind `Ctrl+Alt+L` for `.lua` files.
-  - Node.js is assumed already present for `prettier`/`prettierd`/`eslint_d`.
+  - Mason also installs `jdtls`, `java-debug-adapter`, `java-test`, `prettierd`, `prettier` and `hadolint` on first start (Node.js must be present for the npm ones).
+  - Rust needs the toolchain component: `rustup component add rust-analyzer`. Java tests need the JUnit runner once: `:NeotestJava setup`.
   - The config degrades gracefully if any of these are missing — it just won't error, those specific features simply won't work until installed.
 - **Cmd-key IDE shortcuts** (optional, terminal-only): bindings like `Cmd+Shift+N` for file lookup need Ghostty configured to forward the Cmd combo as an escape sequence, *and* the corresponding decode snippet added to `lua/core/keymaps.lua` — see `docs/ghostty-keybinds.md` for both halves. Until you wire that up, the `<leader>`-based equivalents (`<leader>ff`, etc.) always work with zero terminal configuration, so there's no rush.
 - **VS Code users**: if you also use this repo through the `vscode-neovim` extension, see `docs/vscode-keybindings.md` for the IntelliJ-style verb-to-VS Code-command mapping (rename, references, code action, go-to-def, run test) to wire into VS Code's `keybindings.json`.
