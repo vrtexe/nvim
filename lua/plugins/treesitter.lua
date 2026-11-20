@@ -22,6 +22,7 @@ local PARSERS = {
   "cpp",
   "java",
   "kotlin",
+  "python",
 }
 
 return {

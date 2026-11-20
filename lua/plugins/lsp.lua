@@ -1,5 +1,9 @@
 return {
-  { "williamboman/mason.nvim", cmd = "Mason", opts = {} },
+  {
+    "williamboman/mason.nvim",
+    cmd = { "Mason", "MasonInstall", "MasonUninstall", "MasonUpdate", "MasonLog" },
+    opts = {},
+  },
   { "j-hui/fidget.nvim", event = "LspAttach", opts = {} },
 
   {
@@ -27,15 +31,28 @@ return {
         "dockerls",
         "sqls",
         "bashls",
+        "pyright",
       }
       require("mason").setup()
       -- automatic_enable enables ONLY installed servers (and enables each as its
       -- install completes). Do NOT manually vim.lsp.enable() the whole list —
       -- that force-spawns servers mason hasn't installed yet ("failed to spawn").
+      -- jdtls is started by nvim-jdtls (ftplugin/java.lua); enabling it here too
+      -- would attach a second client.
       require("mason-lspconfig").setup({
         ensure_installed = servers,
-        automatic_enable = true,
+        automatic_enable = { exclude = { "jdtls" } },
       })
+
+      -- Mason packages that are not lspconfig servers: Java server + debug/test
+      -- bundles, formatters and linters used by conform / nvim-lint.
+      local registry = require("mason-registry")
+      registry.refresh(function()
+        for _, name in ipairs({ "jdtls", "java-debug-adapter", "java-test", "prettierd", "prettier", "hadolint" }) do
+          local pkg = registry.get_package(name)
+          if not pkg:is_installed() then pkg:install() end
+        end
+      end)
 
       local caps = require("blink.cmp").get_lsp_capabilities()
       vim.lsp.config("*", { capabilities = caps })
@@ -67,6 +84,22 @@ return {
           },
         })
       end
+
+      -- Upstream falls back to `.git` as a root (for Tailwind v4), which attaches
+      -- tailwindcss to every buffer in every repo. Require a real Tailwind marker.
+      vim.lsp.config("tailwindcss", {
+        root_dir = function(bufnr, on_dir)
+          local fname = vim.api.nvim_buf_get_name(bufnr)
+          local markers = require("lspconfig.util").insert_package_json({
+            "tailwind.config.js",
+            "tailwind.config.cjs",
+            "tailwind.config.mjs",
+            "tailwind.config.ts",
+          }, "tailwindcss", fname)
+          local found = vim.fs.find(markers, { path = fname, upward = true })[1]
+          if found then on_dir(vim.fs.dirname(found)) end
+        end,
+      })
 
       -- Inlay hints (inferred types, param names) are server-driven and mostly
       -- opt-in per server. Enable the categories; the LspAttach hook below turns
@@ -123,7 +156,7 @@ return {
 
   {
     "stevearc/conform.nvim",
-    event = "BufWritePre",
+    cmd = "ConformInfo", -- format keymaps load it via require()
     opts = {
       format_on_save = false, -- user preference: OFF
       formatters_by_ft = {
