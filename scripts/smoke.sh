@@ -44,5 +44,18 @@ echo "== 6. Keymap modes cycle cleanly =="
 modes=$(nvim --headless "+lua local km=require('keymaps'); for _,m in ipairs({'classic','consistent','vscode','intellij','classic'}) do assert(km.switch(m), 'switch '..m) end; io.stdout:write('MODES-CYCLE-OK\n')" "+qa" 2>&1)
 echo "$modes" | grep -q "MODES-CYCLE-OK" && echo "MODES-OK" || { echo "FAIL: mode cycle"; fail=1; }
 
+echo "== 7. DAP adapters registered by mason-nvim-dap =="
+adapters=$(nvim --headless "+lua io.stdout:write('ADAPTERS='..table.concat(vim.tbl_keys(require('dap').adapters), ',')..'\n')" "+qa" 2>&1 | grep -E "ADAPTERS=")
+echo "$adapters"
+echo "$adapters" | grep -q "delve" && echo "DAP-OK" || { echo "FAIL: no dap adapters"; fail=1; }
+
+echo "== 8. No deprecated API calls with every plugin loaded =="
+deps=$(nvim --headless \
+  --cmd "lua _G.__dep={}; local o=vim.deprecate; vim.deprecate=function(n,...) local s=debug.traceback('',2):match('/lazy/([^/]+)') or '?'; __dep[#__dep+1]=n..' @ '..s; return o(n,...) end" \
+  /tmp/smoke_probe.lua "+doautocmd UIEnter" "+Lazy! load all" \
+  "+lua for _,d in ipairs(__dep) do io.stdout:write('DEPRECATED '..d..'\n') end; io.stdout:write('DEP-SCAN-DONE\n')" "+qa!" 2>&1)
+echo "$deps" | grep -E "^DEPRECATED" | sort -u
+if echo "$deps" | grep -q "DEP-SCAN-DONE" && ! echo "$deps" | grep -q "^DEPRECATED"; then echo "DEPRECATIONS-OK"; else echo "FAIL: deprecated calls above"; fail=1; fi
+
 echo "== SMOKE DONE (fail=$fail) =="
 exit $fail
