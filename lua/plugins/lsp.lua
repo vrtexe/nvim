@@ -48,7 +48,7 @@ return {
       -- bundles, formatters and linters used by conform / nvim-lint.
       local registry = require("mason-registry")
       registry.refresh(function()
-        for _, name in ipairs({ "jdtls", "java-debug-adapter", "java-test", "prettierd", "prettier", "hadolint" }) do
+        for _, name in ipairs({ "jdtls", "java-debug-adapter", "java-test", "js-debug-adapter", "prettierd", "prettier", "hadolint" }) do
           local pkg = registry.get_package(name)
           if not pkg:is_installed() then pkg:install() end
         end

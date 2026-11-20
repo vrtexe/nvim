@@ -99,7 +99,7 @@ Launch `nvim` in a project directory (or bare `nvim`, then pick from the dashboa
 
 - `<leader>tt` runs the nearest test (neotest, with Jest/Go/Rust adapters wired in); `<leader>tf` runs every test in the current file; `<leader>ts` toggles the test summary/tree panel.
 - `<leader>rr` runs a task via Overseer (build/lint/whatever task you pick); `<leader>rl` opens the task list to watch/rerun past tasks.
-- `<leader>db` toggles a breakpoint on the current line; `<leader>dc` starts/continues a debug session (DAP, via codelldb, delve or java-debug depending on language). The DAP UI opens automatically when a session launches or attaches.
+- `<leader>db` toggles a breakpoint on the current line; `<leader>dc` starts/continues a debug session (DAP, via codelldb, delve, java-debug or js-debug-adapter depending on language; JS/TS offers "Launch file", "Attach to process" and "Chrome: localhost:5173 (Vite)", Svelte the Chrome one). The DAP UI opens automatically when a session launches or attaches.
 - While debugging: `F7` steps into, `F8` steps over, `Shift+F8` steps out.
 
 ## 7. Layout
@@ -127,7 +127,7 @@ Launch `nvim` in a project directory (or bare `nvim`, then pick from the dashboa
   - `lazygit` powers `<leader>gg`.
   - `ripgrep` and `fd` make the find/grep pickers (snacks.nvim) fast (and are used by some pickers directly).
   - `stylua` is the Lua formatter behind `Ctrl+Alt+L` for `.lua` files.
-  - Mason also installs `jdtls`, `java-debug-adapter`, `java-test`, `prettierd`, `prettier` and `hadolint` on first start (Node.js must be present for the npm ones).
+  - Mason also installs `jdtls`, `java-debug-adapter`, `java-test`, `js-debug-adapter`, `prettierd`, `prettier` and `hadolint` on first start (Node.js must be present for the npm ones).
   - Rust needs the toolchain component: `rustup component add rust-analyzer`. Java tests need the JUnit runner once: `:NeotestJava setup`.
   - The config degrades gracefully if any of these are missing — it just won't error, those specific features simply won't work until installed.
 - **Cmd-key IDE shortcuts** (optional, terminal-only): bindings like `Cmd+Shift+N` for file lookup need Ghostty configured to forward the Cmd combo as an escape sequence, *and* the corresponding decode snippet added to `lua/core/keymaps.lua` — see `docs/ghostty-keybinds.md` for both halves. Until you wire that up, the `<leader>`-based equivalents (`<leader>ff`, etc.) always work with zero terminal configuration, so there's no rush.

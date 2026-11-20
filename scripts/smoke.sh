@@ -57,5 +57,30 @@ deps=$(nvim --headless \
 echo "$deps" | grep -E "^DEPRECATED" | sort -u
 if echo "$deps" | grep -q "DEP-SCAN-DONE" && ! echo "$deps" | grep -q "^DEPRECATED"; then echo "DEPRECATIONS-OK"; else echo "FAIL: deprecated calls above"; fail=1; fi
 
+echo "== 9. A language server attaches per language (Java, Go, Rust, TypeScript, Python) =="
+proj=$(mktemp -d)
+mkdir -p "$proj/src/demo" "$proj/rs/src"
+git -C "$proj" init -q
+printf 'package demo;\npublic class App {}\n' > "$proj/src/demo/App.java"
+printf 'module demo\n\ngo 1.22\n' > "$proj/go.mod"
+printf 'package main\n\nfunc main() {}\n' > "$proj/main.go"
+printf '[package]\nname = "rs"\nversion = "0.1.0"\nedition = "2021"\n' > "$proj/rs/Cargo.toml"
+printf 'fn main() {}\n' > "$proj/rs/src/main.rs"
+printf 'export const x: number = 1;\n' > "$proj/a.ts"
+printf 'x = 1\n' > "$proj/a.py"
+# One nvim per file, each waiting up to 40 s for a client. The leading newline
+# keeps the line apart from jdtls progress text, which has none.
+langs=$(cd "$proj" && for f in src/demo/App.java main.go rs/src/main.rs a.ts a.py; do
+  nvim --headless "$f" \
+    "+lua vim.wait(40000, function() return #vim.lsp.get_clients({bufnr=0}) > 0 end, 500) local c={} for _,x in ipairs(vim.lsp.get_clients({bufnr=0})) do c[#c+1]=x.name end io.stdout:write('\nLANG '..vim.bo.filetype..'='..table.concat(c,',')..'\n')" \
+    "+qa!" 2>&1 | grep -E "^LANG "
+done)
+pkill -f "jdtls-workspace/$(basename "$proj")" 2>/dev/null
+rm -rf "$proj"
+echo "$langs"
+for ft in java go rust typescript python; do
+  echo "$langs" | grep -qE "^LANG $ft=.+" || { echo "FAIL: no language server for $ft"; fail=1; }
+done
+
 echo "== SMOKE DONE (fail=$fail) =="
 exit $fail

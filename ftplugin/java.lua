@@ -18,7 +18,13 @@ for _, jar in ipairs(vim.fn.glob(mason .. "/java-test/extension/server/*.jar", t
 end
 
 jdtls.start_or_attach({
-  cmd = { mason .. "/jdtls/bin/jdtls", "--jvm-arg=-javaagent:" .. mason .. "/jdtls/lombok.jar", "-data", ws },
+  cmd = {
+    mason .. "/jdtls/bin/jdtls",
+    "--jvm-arg=-Xmx2g", -- uncapped jdtls grows past 1.5 GB on large projects
+    "--jvm-arg=-javaagent:" .. mason .. "/jdtls/lombok.jar",
+    "-data",
+    ws,
+  },
   root_dir = root,
   capabilities = require("blink.cmp").get_lsp_capabilities(),
   init_options = { bundles = bundles },
@@ -26,3 +32,20 @@ jdtls.start_or_attach({
 vim.opt_local.shiftwidth = 4
 vim.opt_local.tabstop = 4
 vim.opt_local.softtabstop = 4
+
+-- jdtls refactorings, buffer-local under <localleader> in every keymap mode.
+local function map(mode, lhs, rhs, desc) vim.keymap.set(mode, lhs, rhs, { buffer = true, desc = desc }) end
+map("n", "<localleader>o", jdtls.organize_imports, "Organize imports")
+map("n", "<localleader>v", jdtls.extract_variable, "Extract variable")
+map("x", "<localleader>v", function() jdtls.extract_variable({ visual = true }) end, "Extract variable")
+map("n", "<localleader>V", jdtls.extract_variable_all, "Extract variable (all occurrences)")
+map(
+  "x",
+  "<localleader>V",
+  function() jdtls.extract_variable_all({ visual = true }) end,
+  "Extract variable (all occurrences)"
+)
+map("n", "<localleader>c", jdtls.extract_constant, "Extract constant")
+map("x", "<localleader>c", function() jdtls.extract_constant({ visual = true }) end, "Extract constant")
+map("x", "<localleader>m", function() jdtls.extract_method({ visual = true }) end, "Extract method")
+map("n", "<localleader>s", jdtls.super_implementation, "Goto super implementation")
