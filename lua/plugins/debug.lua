@@ -3,7 +3,12 @@ return {
     "mfussenegger/nvim-dap",
     dependencies = {
       { "rcarriga/nvim-dap-ui", dependencies = { "nvim-neotest/nvim-nio" } },
-      { "jay-babu/mason-nvim-dap.nvim", opts = { ensure_installed = { "codelldb", "delve" } } },
+      {
+        "jay-babu/mason-nvim-dap.nvim",
+        dependencies = { "williamboman/mason.nvim" },
+        -- handlers = {} registers every installed adapter with its default config.
+        opts = { ensure_installed = { "codelldb", "delve" }, handlers = {} },
+      },
     },
     lazy = true,
     config = function()

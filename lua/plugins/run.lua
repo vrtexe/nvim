@@ -6,7 +6,8 @@ return {
       "nvim-neotest/nvim-nio",
       "nvim-treesitter/nvim-treesitter",
       "nvim-neotest/neotest-jest",
-      "nvim-neotest/neotest-go",
+      { "fredrikaverpil/neotest-golang", version = "*" },
+      "rcasia/neotest-java",
       "mrcjkb/rustaceanvim",
     },
     lazy = true,
@@ -14,7 +15,8 @@ return {
       require("neotest").setup({
         adapters = {
           require("neotest-jest"),
-          require("neotest-go"),
+          require("neotest-golang")({}),
+          require("neotest-java")({}),
           require("rustaceanvim.neotest"),
         },
       })
