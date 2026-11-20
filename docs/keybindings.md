@@ -122,6 +122,7 @@ buffer/terminal management, clipboard, save) and never change when you switch.
 |-----|--------|
 | `<C-h>` / `<C-j>` / `<C-k>` / `<C-l>` | Move to left / lower / upper / right pane (also from a terminal) |
 | `<S-l>` / `<S-h>` | Next / previous buffer |
+| `<leader>bo` | Close other buffers |
 | `<leader>wv` / `<leader>ws` | Split vertical / horizontal |
 | `<leader>wc` / `<leader>wo` / `<leader>w=` | Close window / only (close others) / equalize |
 | `<leader>wt` / `<leader>wn` / `<leader>wp` | New tab / next tab / prev tab |
@@ -133,6 +134,10 @@ buffer/terminal management, clipboard, save) and never change when you switch.
 | `<C-s>` | Save file (normal & insert) |
 | `<Esc>` | Clear search highlight |
 | `<A-Up>` / `<A-Down>` | Move line/selection up / down |
+| `<` / `>` (visual) | Indent and keep the selection |
+| `n` / `N` | Always next / previous match, whichever way you searched |
+| `]w` / `[w` | Next / previous warning (`]d` `[d` `]q` `[q` are Neovim defaults) |
+| `<leader>xq` / `<leader>xl` | Toggle quickfix / location list |
 | `<C-c>` (visual) | Copy to system clipboard |
 | `<C-v>` (insert) | Paste from system clipboard (in visual, `p` already pastes it: `clipboard=unnamedplus`) |
 | `gcc` / `gc` (+ `<C-_>`, `<D-/>`) | Toggle comment (line / motion) |
@@ -147,8 +152,23 @@ buffer/terminal management, clipboard, save) and never change when you switch.
 | `<leader>ut` | Toggle theme (dark/light) |
 | `<leader>uh` | Toggle inlay hints |
 | `<leader>um` | Toggle markdown rendering |
+| `<leader>us` / `uw` / `ud` | Toggle spelling / wrap / diagnostics |
+| `<leader>ul` / `uL` | Toggle line numbers / relative numbers |
 | `<leader>sn` / `<leader>un` | Notification history / dismiss notifications |
 | `<leader>qs` / `<leader>ql` / `<leader>qd` | Restore session (cwd) / restore last / don't save |
+| `<leader>qq` | Quit all |
+
+### Automatic behaviour (all modes)
+
+- Files changed on disk (by Claude Code, git or a formatter) reload when Neovim
+  regains focus or you leave a terminal.
+- A reopened file starts at the last cursor position.
+- Copied text flashes briefly.
+- `q` closes help, quickfix, `:checkhealth`, test output, grug-far and similar panels.
+- Markdown, plain text and commit messages wrap and are spell-checked.
+- Saving a file creates missing parent folders.
+- Splits re-balance when the terminal is resized.
+- `:q` with unsaved changes asks whether to save.
 
 ---
 

@@ -29,6 +29,12 @@ o.scrolloff = 6
 o.smoothscroll = true -- smooth scroll over wrapped lines (native 0.10+)
 o.updatetime = 250
 o.timeoutlen = 400 -- which-key popup delay
+o.confirm = true -- ask to save instead of failing on :q with unsaved changes
+o.virtualedit = "block" -- block selections may extend past line ends
+o.splitkeep = "screen" -- text stays put when a split opens or closes
+o.jumpoptions = "view" -- <C-o>/<C-i> restore the scroll position
+o.showmode = false -- lualine shows the mode
+o.cursorline = true
 
 -- Inline diagnostics: gutter signs + end-of-line virtual text (REQUIRED)
 vim.diagnostic.config({

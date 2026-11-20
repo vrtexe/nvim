@@ -30,9 +30,48 @@ return {
     { "v", "<A-Down>", ":m '>+1<cr>gv=gv", "Move selection down" },
     { "v", "<A-Up>", ":m '<-2<cr>gv=gv", "Move selection up" },
 
+    -- Keep the selection after indenting; n/N always search forward/backward;
+    -- undo points inside long insertions (from LazyVim)
+    { "x", "<", "<gv", "Indent left" },
+    { "x", ">", ">gv", "Indent right" },
+    { "n", "n", "'Nn'[v:searchforward].'zv'", "Next search result", opts = { expr = true } },
+    { { "x", "o" }, "n", "'Nn'[v:searchforward]", "Next search result", opts = { expr = true } },
+    { "n", "N", "'nN'[v:searchforward].'zv'", "Prev search result", opts = { expr = true } },
+    { { "x", "o" }, "N", "'nN'[v:searchforward]", "Prev search result", opts = { expr = true } },
+    { "i", ",", ",<C-g>u", "Comma with undo point" },
+    { "i", ".", ".<C-g>u", "Period with undo point" },
+    { "i", ";", ";<C-g>u", "Semicolon with undo point" },
+
     -- Buffer cycle
     { "n", "<S-l>", "<cmd>BufferLineCycleNext<cr>", "Next buffer" },
     { "n", "<S-h>", "<cmd>BufferLineCyclePrev<cr>", "Prev buffer" },
+    { "n", "<leader>bo", function() require("snacks").bufdelete.other() end, "Close other buffers" },
+
+    -- Warnings and the quickfix / location lists (]d [d ]q [q are Neovim defaults)
+    {
+      "n",
+      "]w",
+      function() vim.diagnostic.jump({ count = 1, float = true, severity = vim.diagnostic.severity.WARN }) end,
+      "Next warning",
+    },
+    {
+      "n",
+      "[w",
+      function() vim.diagnostic.jump({ count = -1, float = true, severity = vim.diagnostic.severity.WARN }) end,
+      "Prev warning",
+    },
+    {
+      "n",
+      "<leader>xq",
+      function() pcall(vim.fn.getqflist({ winid = 0 }).winid ~= 0 and vim.cmd.cclose or vim.cmd.copen) end,
+      "Quickfix list",
+    },
+    {
+      "n",
+      "<leader>xl",
+      function() pcall(vim.fn.getloclist(0, { winid = 0 }).winid ~= 0 and vim.cmd.lclose or vim.cmd.lopen) end,
+      "Location list",
+    },
 
     -- Terminal (toggleterm)
     { { "n", "t" }, "<C-\\>", "<cmd>ToggleTerm<cr>", "Toggle terminal" },
@@ -74,12 +113,38 @@ return {
     },
     { "n", "<leader>um", "<cmd>RenderMarkdown toggle<cr>", "Toggle markdown render" },
     { "n", "<leader>un", function() require("snacks").notifier.hide() end, "Dismiss notifications" },
+    {
+      "n",
+      "<leader>us",
+      function() require("snacks").toggle.option("spell", { name = "Spelling" }):toggle() end,
+      "Toggle spelling",
+    },
+    {
+      "n",
+      "<leader>uw",
+      function() require("snacks").toggle.option("wrap", { name = "Wrap" }):toggle() end,
+      "Toggle wrap",
+    },
+    {
+      "n",
+      "<leader>ul",
+      function() require("snacks").toggle.option("number", { name = "Line numbers" }):toggle() end,
+      "Toggle line numbers",
+    },
+    {
+      "n",
+      "<leader>uL",
+      function() require("snacks").toggle.option("relativenumber", { name = "Relative numbers" }):toggle() end,
+      "Toggle relative numbers",
+    },
+    { "n", "<leader>ud", function() require("snacks").toggle.diagnostics():toggle() end, "Toggle diagnostics" },
     { "n", "<leader>sn", function() require("snacks").notifier.show_history() end, "Notification history" },
 
     -- Session (<leader>q tree)
     { "n", "<leader>qs", function() require("persistence").load() end, "Restore session (cwd)" },
     { "n", "<leader>ql", function() require("persistence").load({ last = true }) end, "Restore last session" },
     { "n", "<leader>qd", function() require("persistence").stop() end, "Don't save session" },
+    { "n", "<leader>qq", "<cmd>qa<cr>", "Quit all" },
 
     -- Comment reflexes for terminals that send Ctrl+/ variants (native gcc/gc stay)
     { "n", "<C-_>", "gcc", "Toggle comment", opts = { remap = true } },
@@ -108,5 +173,7 @@ return {
     { "<leader>w", group = "window" },
     { "<leader>u", group = "ui" },
     { "<leader>q", group = "session/quit" },
+    { "<leader>b", group = "buffer" },
+    { "<leader>x", group = "diagnostics" },
   },
 }
