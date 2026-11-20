@@ -28,8 +28,19 @@ return {
         }
       end
       local node = {
-        { type = "pwa-node", request = "launch", name = "Launch file", program = "${file}", cwd = "${workspaceFolder}" },
-        { type = "pwa-node", request = "attach", name = "Attach to process", processId = require("dap.utils").pick_process },
+        {
+          type = "pwa-node",
+          request = "launch",
+          name = "Launch file",
+          program = "${file}",
+          cwd = "${workspaceFolder}",
+        },
+        {
+          type = "pwa-node",
+          request = "attach",
+          name = "Attach to process",
+          processId = require("dap.utils").pick_process,
+        },
       }
       local chrome = {
         type = "pwa-chrome",

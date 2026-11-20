@@ -1,4 +1,35 @@
+-- Minimal chrome for embedded use: launch nvim as `NVIM_MINIMAL=1 nvim ...`
+-- (e.g. from inside a TUI app) to drop the top bars — editor tabs (bufferline)
+-- and the breadcrumb "name above" (barbecue) — while keeping the footer statusline.
+local function full_ui() return vim.env.NVIM_MINIMAL ~= "1" end
+
 return {
+  -- Footer statusline: kept even in minimal mode.
+  { "nvim-lualine/lualine.nvim", event = "VeryLazy", opts = { options = { theme = "auto", globalstatus = true } } },
+
+  -- scope.nvim scopes buffers to tab pages, so each tab page acts like a VS Code
+  -- "editor group": bufferline then shows only that group's tabs.
+  { "tiagovla/scope.nvim", enabled = full_ui, event = "VeryLazy", opts = {} },
+
+  {
+    "akinsho/bufferline.nvim",
+    enabled = full_ui,
+    event = "VeryLazy",
+    dependencies = { "tiagovla/scope.nvim" },
+    opts = { options = { diagnostics = "nvim_lsp", separator_style = "thick" } },
+  },
+
+  { "folke/which-key.nvim", event = "VeryLazy", opts = {} },
+
+  -- Breadcrumb "name above" the window: off in minimal mode.
+  {
+    "utilyre/barbecue.nvim",
+    enabled = full_ui,
+    event = "VeryLazy",
+    dependencies = { "SmiteshP/nvim-navic", "nvim-tree/nvim-web-devicons" },
+    opts = { attach_navic = true },
+  },
+
   { "nvim-tree/nvim-web-devicons", lazy = true },
   {
     "projekt0n/github-nvim-theme",
@@ -17,33 +48,61 @@ return {
       local function apply_palette()
         if vim.o.background ~= "dark" then return end
         local set = function(groups, opts)
-          for _, g in ipairs(groups) do vim.api.nvim_set_hl(0, g, opts) end
+          for _, g in ipairs(groups) do
+            vim.api.nvim_set_hl(0, g, opts)
+          end
         end
         set({ "@string", "@string.documentation" }, { fg = "#CAFFBF" })
         set({
-          "@keyword", "@keyword.function", "@keyword.operator", "@keyword.return",
-          "@keyword.conditional", "@keyword.repeat", "@keyword.exception", "@keyword.import",
-          "@conditional", "@repeat", "@exception",
+          "@keyword",
+          "@keyword.function",
+          "@keyword.operator",
+          "@keyword.return",
+          "@keyword.conditional",
+          "@keyword.repeat",
+          "@keyword.exception",
+          "@keyword.import",
+          "@conditional",
+          "@repeat",
+          "@exception",
         }, { fg = "#F97583" })
         set({
-          "@variable", "@variable.member", "@property", "@field",
-          "@parameter", "@variable.parameter",
+          "@variable",
+          "@variable.member",
+          "@property",
+          "@field",
+          "@parameter",
+          "@variable.parameter",
         }, { fg = "#EBF2FF" })
         set({ "@type", "@type.definition", "@constructor" }, { fg = "#BDB2FF" })
         set({ "@number", "@number.float", "@float" }, { fg = "#C8E7FF" })
         set({
-          "@function", "@function.call", "@function.method",
-          "@function.method.call", "@function.builtin",
+          "@function",
+          "@function.call",
+          "@function.method",
+          "@function.method.call",
+          "@function.builtin",
         }, { fg = "#FFD6A5" })
         set({ "@comment" }, { fg = "#569c45", italic = true })
         -- Special group -> blue (this/self, language constants, primitives,
         -- escapes, markdown headings/links).
         set({
-          "@variable.builtin", "@constant", "@constant.builtin", "@boolean",
-          "@type.builtin", "@string.escape",
-          "@markup.heading", "@markup.heading.1", "@markup.heading.2", "@markup.heading.3",
-          "@markup.heading.4", "@markup.heading.5", "@markup.heading.6",
-          "@markup.link", "@markup.link.label", "@markup.link.url",
+          "@variable.builtin",
+          "@constant",
+          "@constant.builtin",
+          "@boolean",
+          "@type.builtin",
+          "@string.escape",
+          "@markup.heading",
+          "@markup.heading.1",
+          "@markup.heading.2",
+          "@markup.heading.3",
+          "@markup.heading.4",
+          "@markup.heading.5",
+          "@markup.heading.6",
+          "@markup.link",
+          "@markup.link.label",
+          "@markup.link.url",
         }, { fg = "#79B8FF" })
       end
 
@@ -68,9 +127,11 @@ return {
 
       vim.cmd.colorscheme(DARK)
 
-      vim.api.nvim_create_user_command("ThemeToggle", function()
-        vim.cmd.colorscheme(vim.o.background == "dark" and LIGHT or DARK)
-      end, { desc = "Toggle GitHub theme (dark/light)" })
+      vim.api.nvim_create_user_command(
+        "ThemeToggle",
+        function() vim.cmd.colorscheme(vim.o.background == "dark" and LIGHT or DARK) end,
+        { desc = "Toggle GitHub theme (dark/light)" }
+      )
     end,
   },
 }

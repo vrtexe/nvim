@@ -48,7 +48,15 @@ return {
       -- bundles, formatters and linters used by conform / nvim-lint.
       local registry = require("mason-registry")
       registry.refresh(function()
-        for _, name in ipairs({ "jdtls", "java-debug-adapter", "java-test", "js-debug-adapter", "prettierd", "prettier", "hadolint" }) do
+        for _, name in ipairs({
+          "jdtls",
+          "java-debug-adapter",
+          "java-test",
+          "js-debug-adapter",
+          "prettierd",
+          "prettier",
+          "hadolint",
+        }) do
           local pkg = registry.get_package(name)
           if not pkg:is_installed() then pkg:install() end
         end
@@ -154,46 +162,10 @@ return {
     end,
   },
 
+  -- Problems list (diagnostics, todos, symbols).
   {
-    "stevearc/conform.nvim",
-    cmd = "ConformInfo", -- format keymaps load it via require()
-    opts = {
-      format_on_save = false, -- user preference: OFF
-      formatters_by_ft = {
-        lua = { "stylua" },
-        javascript = { "prettierd", "prettier", stop_after_first = true },
-        typescript = { "prettierd", "prettier", stop_after_first = true },
-        typescriptreact = { "prettierd", "prettier", stop_after_first = true },
-        svelte = { "prettier" },
-        css = { "prettier" },
-        html = { "prettier" },
-        json = { "prettier" },
-        go = { "gofmt" },
-        rust = { "rustfmt" },
-      },
-    },
-  },
-
-  {
-    "mfussenegger/nvim-lint",
-    event = "BufReadPost",
-    config = function()
-      local lint = require("lint")
-      -- JS/TS linting is handled by the eslint LSP; nvim-lint only covers extras
-      -- (e.g. hadolint for Dockerfiles). Keeping eslint_d here would double-lint.
-      lint.linters_by_ft = { dockerfile = { "hadolint" } }
-      vim.api.nvim_create_autocmd({ "BufWritePost", "BufReadPost" }, {
-        callback = function()
-          -- Only run linters whose executable is actually installed (avoid ENOENT)
-          local run = {}
-          for _, name in ipairs(lint.linters_by_ft[vim.bo.filetype] or {}) do
-            local l = lint.linters[name]
-            local cmd = type(l) == "function" and l().cmd or (type(l) == "table" and l.cmd)
-            if cmd and vim.fn.executable(cmd) == 1 then run[#run + 1] = name end
-          end
-          if #run > 0 then lint.try_lint(run) end
-        end,
-      })
-    end,
+    "folke/trouble.nvim",
+    cmd = "Trouble",
+    opts = {},
   },
 }
