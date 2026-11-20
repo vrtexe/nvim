@@ -71,7 +71,8 @@ return {
     { "n", "gD", vim.lsp.buf.declaration, "Goto declaration" },
     { "n", "gI", vim.lsp.buf.implementation, "Goto implementation" },
     { "n", "gy", vim.lsp.buf.type_definition, "Goto type definition" },
-    { "n", "gr", "<cmd>Glance references<cr>", "References (peek)" },
+    -- grr, not gr: a bare gr waits timeoutlen for the 0.12 defaults grn/gra/gri/grt/grx.
+    { "n", "grr", "<cmd>Glance references<cr>", "References (peek)" },
     { "n", "gK", vim.lsp.buf.signature_help, "Signature help" },
 
     -- Git (hunks under <leader>gh, ops under <leader>g)

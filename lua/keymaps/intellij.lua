@@ -50,8 +50,6 @@ return {
       "Optimize imports",
     },
     { "n", K("<D-d>", "<C-d>"), "yyp", "Duplicate line" },
-    { "n", K("<D-/>", "<C-/>"), "gcc", "Comment line", opts = { remap = true } },
-    { "x", K("<D-/>", "<C-/>"), "gc", "Comment line", opts = { remap = true } },
     -- diagnostics
     {
       "n",
@@ -120,9 +118,6 @@ return {
       "Tool: version control",
     },
   },
-  lsp = {
-    { "n", "<F1>", vim.lsp.buf.hover, "Quick doc" },
-    { "n", K("<D-b>", "<C-b>"), vim.lsp.buf.definition, "Goto definition" },
-  },
+  lsp = {},
   groups = {},
 }

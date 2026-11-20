@@ -16,7 +16,6 @@ return {
     -- System clipboard reflexes (don't shadow vim motions)
     { "v", "<C-c>", '"+y', "Copy to system clipboard" },
     { "i", "<C-v>", "<C-r>+", "Paste from system clipboard" },
-    { "v", "<C-v>", '"+p', "Paste over selection" },
 
     -- Clear search highlight
     { "n", "<Esc>", "<cmd>nohlsearch<cr>", "Clear search highlight" },
@@ -87,6 +86,8 @@ return {
     { "x", "<C-_>", "gc", "Toggle comment", opts = { remap = true } },
     { "n", "<D-/>", "gcc", "Toggle comment", opts = { remap = true } },
     { "x", "<D-/>", "gc", "Toggle comment", opts = { remap = true } },
+    { "n", "<C-/>", "gcc", "Toggle comment", opts = { remap = true } },
+    { "x", "<C-/>", "gc", "Toggle comment", opts = { remap = true } },
   },
   lsp = {},
   groups = {

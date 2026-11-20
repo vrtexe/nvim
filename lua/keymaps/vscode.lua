@@ -48,13 +48,7 @@ return {
     { "n", "<F10>", function() require("dap").step_over() end, "Step over" },
     { "n", "<F11>", function() require("dap").step_into() end, "Step into" },
     { "n", "<S-F11>", function() require("dap").step_out() end, "Step out" },
-    -- editing
-    { "n", K("<D-/>", "<C-/>"), "gcc", "Comment line", opts = { remap = true } },
-    { "x", K("<D-/>", "<C-/>"), "gc", "Comment line", opts = { remap = true } },
   },
-  lsp = {
-    { "n", "<F12>", vim.lsp.buf.definition, "Goto definition" },
-    { "n", "<S-F12>", "<cmd>Glance references<cr>", "References" },
-  },
+  lsp = {},
   groups = {},
 }

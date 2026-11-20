@@ -84,7 +84,7 @@ assert(pcall(function() vim.cmd("KeymapMode") end), ":KeymapMode (no arg) does n
 km.switch("classic")
 for _, pair in ipairs({
   { "n", "gd" },
-  { "n", "gr" },
+  { "n", "grr" },
   { "n", "gy" },
   { "n", "gI" },
   { "n", "<leader>ca" },
@@ -112,9 +112,9 @@ local buf = vim.api.nvim_create_buf(false, true)
 vim.api.nvim_set_current_buf(buf)
 km.apply_lsp(buf)
 assert(vim.fn.maparg("K", "n") ~= "", "classic lsp K applied buffer-local")
--- switching re-applies: vscode binds <F12> buffer-local too
+-- switching tears down the previous scheme's buffer-local lsp maps
 km.switch("vscode")
-assert(vim.fn.maparg("<F12>", "n") ~= "", "vscode lsp <F12> present after switch")
+assert(vim.fn.maparg("K", "n") == "", "classic lsp K removed after switch to vscode")
 
 -- 10. consistent scheme: mnemonic leader-trees (spec §6.2)
 km.switch("consistent")
