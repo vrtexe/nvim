@@ -4,8 +4,8 @@ vim.g.maplocalleader = "\\"
 
 local o = vim.opt
 o.clipboard = "unnamedplus" -- macOS system clipboard
-o.number = true -- absolute line numbers (user preference)
-o.relativenumber = false
+o.number = true -- with relativenumber: current line absolute, the rest relative (as in IntelliJ)
+o.relativenumber = true
 o.expandtab = true
 o.shiftwidth = 2
 o.tabstop = 2
