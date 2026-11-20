@@ -4,6 +4,29 @@
 **Status:** Draft for review
 **Author:** Vangel + Claude
 
+> **Amendment (2026-11-20).** Three rules below changed after a review of how
+> LazyVim, AstroNvim, kickstart and others structure keymaps:
+>
+> 1. **The IDE modes extend the consistent tree.** `vscode` and `intellij`
+>    declare `extends = "consistent"`, so the manager applies base, then the
+>    consistent tree, then the chord overlay. The chords stay pure (no IntelliJ
+>    keys in VS Code mode and the reverse); the tree is the fallback for chords
+>    a terminal without the kitty keyboard protocol cannot send, and it makes
+>    tests, git hunks, grep, harpoon and AI reachable in those modes. The
+>    IntelliJ tool windows `<leader>1`–`8` replace the harpoon slots there.
+> 2. **Navigation is shared, not per mode.** `gd`, `gD`, `grr` (Glance) and `K`
+>    live in `base.lsp`; Neovim's own `grn`, `gra`, `gri`, `grt`, `grx` and `gO`
+>    defaults stay. The consistent tree no longer holds `cd` definition, `cD`,
+>    `ci` implementation, `cy`, `cr` references, `cn` rename or `ck` hover;
+>    `<leader>c` uses the same action letters as classic (`ca`, `cr` rename,
+>    `cf`, `co`, `cs`, `cd` line diagnostics, `ci`/`cO` calls).
+> 3. **LSP-dependent keys go in each layer's `lsp` list**, applied buffer-local
+>    on attach, including the IDE chords (`F12`, `F2`, `Alt+F7`, `Shift+F6`…).
+>    `tests/keymaps_spec.lua` fails on a duplicate `{mode, lhs}` within a layer
+>    and on any key that is a prefix of another live key.
+>
+> Sections 2, 3, 6.2–6.4 and 7 below describe the original design.
+
 ## 1. Problem
 
 The current keymaps feel inconsistent because three idioms are interleaved with

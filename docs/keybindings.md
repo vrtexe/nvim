@@ -86,13 +86,22 @@ instantly.
 |------|-----------|------------------|
 | **`classic`** | Vim-native / LazyVim-canonical: short `g`-prefixed goto, leader groups. | you think in Vim idioms. **(default)** |
 | **`consistent`** | One rule — `<leader>` + category + verb. Everything is a leader tree, fully discoverable via which-key. | you'd rather *discover* keys than memorize them. |
-| **`vscode`** | Pure VS Code default keymap (`F12`, `F2`, `Cmd+.`, `F5`…). | your muscle memory is VS Code. |
-| **`intellij`** | Pure IntelliJ IDEA default keymap (`Cmd+B`, `Alt+F7`, `Shift+F6`, tool windows). | your muscle memory is IntelliJ. |
+| **`vscode`** | VS Code default keymap (`F12`, `F2`, `Cmd+.`, `F5`…) on top of the `consistent` leader tree. | your muscle memory is VS Code. |
+| **`intellij`** | IntelliJ IDEA default keymap (`Cmd+B`, `Alt+F7`, `Shift+F6`, tool windows) on top of the `consistent` leader tree. | your muscle memory is IntelliJ. |
 
-`vscode` and `intellij` are **separate, self-contained** — only one is ever
-active, so their keys never collide.
+`vscode` and `intellij` never share chords: VS Code mode has no IntelliJ keys and
+the reverse. Both load the `consistent` leader tree underneath, so every feature
+stays reachable through `<leader>` when the terminal cannot send a `Cmd` or
+`Ctrl+Shift` chord. In `intellij`, the tool windows `<leader>1`–`8` replace the
+harpoon slots `<leader>1`–`4`.
 
-> **which-key:** in `classic`/`consistent`, pause after `<leader>` (or any group
+Code navigation is the same in all four modes, on the `g` keys Neovim itself
+uses: `gd` definition, `gD` declaration, `grr` references (peek), `gri`
+implementation, `grt` type definition, `grn` rename, `gra` code action, `gO`
+document symbols, `K` hover. LSP keys exist only in buffers with a language
+server attached.
+
+> **which-key:** in every mode, pause after `<leader>` (or any group
 > prefix like `<leader>g`) and a popup lists what follows. This is the fastest
 > way to learn a mode.
 
@@ -138,14 +147,14 @@ buffer/terminal management, clipboard, save) and never change when you switch.
 | `<leader>ut` | Toggle theme (dark/light) |
 | `<leader>uh` | Toggle inlay hints |
 | `<leader>um` | Toggle markdown rendering |
-| `<leader>nh` / `<leader>un` | Notification history / dismiss notifications |
+| `<leader>sn` / `<leader>un` | Notification history / dismiss notifications |
 | `<leader>qs` / `<leader>ql` / `<leader>qd` | Restore session (cwd) / restore last / don't save |
 
 ---
 
 ## 4. Per-mode reference
 
-Hover-doc (`K` in classic/consistent, `Cmd+K Cmd+I` / `F1` in the IDE modes) and
+Hover-doc (`K` in every mode, plus `Cmd+K Cmd+I` / `F1` in the IDE modes) and
 `<leader>`-group popups mean you rarely need to memorize these — but here they are.
 
 ### 4a. `classic` — vim-native
@@ -156,8 +165,8 @@ Hover-doc (`K` in classic/consistent, `Cmd+K Cmd+I` / `F1` in the IDE modes) and
 |-----|--------|-----|--------|
 | `gd` | Definition | `<leader>cr` | Rename |
 | `gD` | Declaration | `<leader>ca` | Code action |
-| `gI` | Implementation | `<leader>cf` | Format |
-| `gy` | Type definition | `<leader>co` | Organize imports |
+| `gri` (`gI`) | Implementation | `<leader>cf` | Format |
+| `grt` (`gy`) | Type definition | `<leader>co` | Organize imports |
 | `grr` | References (peek) | `<leader>cs` | Symbols / outline |
 | `K` | Hover / peek fold | `<leader>cd` | Line diagnostics |
 | `gK` | Signature help | `<leader>ci` / `<leader>cO` | Incoming / outgoing calls |
@@ -190,22 +199,25 @@ step over/into/out · `<leader>du` debug UI · `<leader>de` eval.
 ### 4b. `consistent` — one rule: `<leader>` + category + verb
 
 Every action lives under a category prefix. Press the prefix, read the which-key
-popup. `cr` = **r**eferences, `cn` = re**n**ame (the one deliberate twist).
+popup. Navigation (`gd`, `grr`, `gri`, `grt`, `K`) is not in the tree; it is the
+same `g` family as in every mode. `<leader>c` uses the same letters as `classic`.
 
 | Prefix | Category | Examples |
 |--------|----------|----------|
-| `<leader>c` | **code** | `cd` def · `cD` decl · `ci` impl · `cy` type · `cr` refs · `cn` rename · `ca` action · `cf` format · `co` organize · `ck` hover · `cs` symbols · `ce` line diag · `cI`/`cO` in/out calls |
+| `<leader>c` | **code** | `ca` action · `cr` rename · `cf` format · `co` organize imports · `cs` symbols / outline · `cd` line diagnostics · `ci`/`cO` incoming/outgoing calls |
 | `<leader>f` | **find** | `ff` files · `fg` grep · `fr` recent · `fb` buffers · `fp` projects · `fs` symbols · `fw` grep word · `fk` keymaps · `fh` help · `fe` explorer |
 | `<leader>x` | **diagnostics** | `xx` problems · `xb` buffer · `xn`/`xp` next/prev · `xt` todos |
 | `<leader>g` | **git** | `gs` stage · `gr` reset · `gp` preview · `gb` blame · `gB` toggle blame · `gn`/`gN` next/prev hunk · `gg` LazyGit · `gd` diff · `gh` history · `gl` log · `gt` status · `ih` hunk object |
 | `<leader>r` | **run** | `rr` run · `rl` list · `rc` shell cmd |
 | `<leader>t` | **test** | `tt` nearest · `tf` file · `ts` summary · `to` output · `td` debug · `tn`/`tp` next/prev failed |
 | `<leader>d` | **debug** | `db` bp · `dB` cond bp · `dc` continue · `dC` to cursor · `dO`/`di`/`do` step · `dt` terminate · `dl` last · `du` UI · `de` eval |
-| `<leader>s` | **search** | `sr` replace · `sg` grep · `sw` grep word |
+| `<leader>s` | **search** | `sr` replace · `sg` grep · `sw` grep word · `sn` notifications |
 | `<leader>a` | **AI** | see §6 |
 | `<leader>1`–`4` | **harpoon** slots; `ha`/`hh` add/menu |
 
 ### 4c. `vscode` — VS Code keymap (macOS shown; Win/Linux in parens)
+
+These chords sit on top of the `consistent` tree (§4b), which also works here.
 
 | Key | Action | Key | Action |
 |-----|--------|-----|--------|
@@ -222,6 +234,8 @@ popup. `cr` = **r**eferences, `cn` = re**n**ame (the one deliberate twist).
 | `F9` | Toggle breakpoint | `F10` / `F11` / `Shift+F11` | Step over / into / out |
 
 ### 4d. `intellij` — IntelliJ IDEA keymap (macOS shown; Win/Linux in parens)
+
+These chords sit on top of the `consistent` tree (§4b), which also works here.
 
 | Key | Action | Key | Action |
 |-----|--------|-----|--------|
@@ -242,6 +256,13 @@ popup. `cr` = **r**eferences, `cn` = re**n**ame (the one deliberate twist).
 project · `<leader>2` terminal · `<leader>3` editor · `<leader>4` run ·
 `<leader>5` debug · `<leader>6` structure · `<leader>7` tests · `<leader>8`
 version control.
+
+### Java refactorings (every mode, `<localleader>` = `\`)
+
+In Java buffers: `\o` organize imports · `\v` extract variable · `\V` extract
+variable (all occurrences) · `\c` extract constant · `\m` extract method
+(visual) · `\s` go to super implementation. `\v`, `\V` and `\c` also work on
+a visual selection.
 
 ---
 

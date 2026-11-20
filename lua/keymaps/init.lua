@@ -60,13 +60,26 @@ function M.apply_lsp(bufnr)
   apply_maps(M._lsp, M._lsp_bufs[bufnr], { buffer = bufnr })
 end
 
+-- Layers applied for a mode, in order: base, the overlay it extends (if any),
+-- then the overlay itself. Later layers win on the same {mode, lhs}.
+local function layers(name)
+  local ov = overlay(name)
+  local list = { base() }
+  if ov.extends then list[#list + 1] = overlay(ov.extends) end
+  list[#list + 1] = ov
+  return list
+end
+
+M.layers = layers
+
 local function apply(name)
   M._global = {}
-  apply_maps(base().maps, M._global)
-  apply_maps(overlay(name).maps, M._global)
-  M._lsp = overlay(name).lsp or {}
-  register_groups(base().groups)
-  register_groups(overlay(name).groups)
+  M._lsp = {}
+  for _, layer in ipairs(layers(name)) do
+    apply_maps(layer.maps, M._global)
+    vim.list_extend(M._lsp, layer.lsp or {})
+    register_groups(layer.groups)
+  end
   -- re-apply lsp maps to every buffer that already has them (mode switch)
   for bufnr, _ in pairs(M._lsp_bufs) do
     if vim.api.nvim_buf_is_valid(bufnr) then

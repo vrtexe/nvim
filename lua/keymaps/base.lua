@@ -74,7 +74,7 @@ return {
     },
     { "n", "<leader>um", "<cmd>RenderMarkdown toggle<cr>", "Toggle markdown render" },
     { "n", "<leader>un", function() require("snacks").notifier.hide() end, "Dismiss notifications" },
-    { "n", "<leader>nh", function() require("snacks").notifier.show_history() end, "Notification history" },
+    { "n", "<leader>sn", function() require("snacks").notifier.show_history() end, "Notification history" },
 
     -- Session (<leader>q tree)
     { "n", "<leader>qs", function() require("persistence").load() end, "Restore session (cwd)" },
@@ -89,11 +89,24 @@ return {
     { "n", "<C-/>", "gcc", "Toggle comment", opts = { remap = true } },
     { "x", "<C-/>", "gc", "Toggle comment", opts = { remap = true } },
   },
-  lsp = {},
+  lsp = {
+    -- Navigation is the same in every mode: gd/gD here plus Neovim's own
+    -- grn/gra/gri/grt/grx/gO defaults. Only grr is swapped for the Glance peek.
+    { "n", "gd", vim.lsp.buf.definition, "Goto definition" },
+    { "n", "gD", vim.lsp.buf.declaration, "Goto declaration" },
+    { "n", "grr", "<cmd>Glance references<cr>", "References (peek)" },
+    {
+      "n",
+      "K",
+      function()
+        if not require("ufo").peekFoldedLinesUnderCursor() then vim.lsp.buf.hover() end
+      end,
+      "Hover / peek fold",
+    },
+  },
   groups = {
     { "<leader>w", group = "window" },
     { "<leader>u", group = "ui" },
     { "<leader>q", group = "session/quit" },
-    { "<leader>n", group = "notifications" },
   },
 }

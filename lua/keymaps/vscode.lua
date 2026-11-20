@@ -1,4 +1,6 @@
--- VS Code default-keymap emulation (spec §6.3). Pure — no IntelliJ keys.
+-- VS Code default-keymap emulation (spec §6.3). No IntelliJ keys. The chords sit
+-- on top of the consistent leader tree, which stays reachable when a terminal
+-- cannot send a Cmd/Ctrl+Shift chord.
 local mac = vim.fn.has("mac") == 1
 local function K(m, w) return mac and m or w end
 local function snacks() return require("snacks") end
@@ -6,31 +8,17 @@ local function snacks() return require("snacks") end
 return {
   name = "vscode",
   desc = "VS Code emulation",
+  extends = "consistent",
   maps = {
-    -- navigation / code insight
-    { "n", "<F12>", vim.lsp.buf.definition, "Goto definition" },
-    { "n", "<A-F12>", "<cmd>Glance definitions<cr>", "Peek definition" },
-    { "n", K("<D-F12>", "<C-F12>"), vim.lsp.buf.implementation, "Goto implementations" },
-    { "n", "<S-F12>", "<cmd>Glance references<cr>", "References" },
-    { "n", K("<D-k><D-i>", "<C-k><C-i>"), vim.lsp.buf.hover, "Hover" },
-    { "n", "<F2>", vim.lsp.buf.rename, "Rename" },
-    { { "n", "x" }, K("<D-.>", "<C-.>"), vim.lsp.buf.code_action, "Quick fix" },
     {
       "n",
       "<S-A-f>",
       function() require("conform").format({ async = true, lsp_format = "fallback" }) end,
       "Format document",
     },
-    {
-      "n",
-      "<S-A-o>",
-      function() vim.lsp.buf.code_action({ context = { only = { "source.organizeImports" } }, apply = true }) end,
-      "Organize imports",
-    },
     -- pickers
     { "n", K("<D-p>", "<C-p>"), function() snacks().picker.files() end, "Go to file" },
     { "n", K("<D-S-p>", "<C-S-p>"), function() snacks().picker.commands() end, "Command palette" },
-    { "n", K("<D-S-o>", "<C-S-o>"), function() snacks().picker.lsp_symbols() end, "Symbols in file" },
     { "n", K("<D-S-f>", "<C-S-f>"), function() require("grug-far").open() end, "Find in files" },
     -- diagnostics
     { "n", "<F8>", function() vim.diagnostic.jump({ count = 1, float = true }) end, "Next problem" },
@@ -49,6 +37,21 @@ return {
     { "n", "<F11>", function() require("dap").step_into() end, "Step into" },
     { "n", "<S-F11>", function() require("dap").step_out() end, "Step out" },
   },
-  lsp = {},
+  lsp = {
+    { "n", "<F12>", vim.lsp.buf.definition, "Goto definition" },
+    { "n", "<A-F12>", "<cmd>Glance definitions<cr>", "Peek definition" },
+    { "n", K("<D-F12>", "<C-F12>"), vim.lsp.buf.implementation, "Goto implementations" },
+    { "n", "<S-F12>", "<cmd>Glance references<cr>", "References" },
+    { "n", K("<D-k><D-i>", "<C-k><C-i>"), vim.lsp.buf.hover, "Hover" },
+    { "n", "<F2>", vim.lsp.buf.rename, "Rename" },
+    { { "n", "x" }, K("<D-.>", "<C-.>"), vim.lsp.buf.code_action, "Quick fix" },
+    {
+      "n",
+      "<S-A-o>",
+      function() vim.lsp.buf.code_action({ context = { only = { "source.organizeImports" } }, apply = true }) end,
+      "Organize imports",
+    },
+    { "n", K("<D-S-o>", "<C-S-o>"), function() snacks().picker.lsp_symbols() end, "Symbols in file" },
+  },
   groups = {},
 }

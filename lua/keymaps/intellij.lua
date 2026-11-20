@@ -1,6 +1,9 @@
--- IntelliJ IDEA default-keymap emulation (spec §6.4). Pure — no VS Code keys.
+-- IntelliJ IDEA default-keymap emulation (spec §6.4). No VS Code keys. The chords
+-- sit on top of the consistent leader tree, which stays reachable when a
+-- terminal cannot send a Cmd/Ctrl+Shift chord.
 -- Run/Debug use <S-F10>/<S-F9> on both platforms (mac ⌃R/⌃D would shadow vim).
--- Tool-window number focus (<leader>1-8) is IntelliJ's signature, only here.
+-- Tool-window number focus (<leader>1-8) is IntelliJ's signature and replaces
+-- the consistent tree's harpoon slots 1-4 in this mode.
 local mac = vim.fn.has("mac") == 1
 local function K(m, w) return mac and m or w end
 local function snacks() return require("snacks") end
@@ -22,32 +25,18 @@ end
 return {
   name = "intellij",
   desc = "IntelliJ emulation",
+  extends = "consistent",
   maps = {
-    -- navigation
-    { "n", K("<D-b>", "<C-b>"), vim.lsp.buf.definition, "Goto definition" },
-    { "n", K("<D-A-b>", "<C-A-b>"), vim.lsp.buf.implementation, "Goto implementation" },
-    { "n", K("<D-S-b>", "<C-S-b>"), vim.lsp.buf.type_definition, "Goto type declaration" },
-    { "n", "<A-F7>", "<cmd>Glance references<cr>", "Find usages" },
-    { "n", "<A-Space>", "<cmd>Glance definitions<cr>", "Quick definition" },
-    { "n", "<F1>", vim.lsp.buf.hover, "Quick doc" },
+    -- navigation (LSP chords are in `lsp`)
     { "n", K("<D-o>", "<C-n>"), function() snacks().picker.files() end, "Go to class/file" },
-    { "n", K("<D-A-o>", "<C-A-S-n>"), function() snacks().picker.lsp_symbols() end, "Go to symbol" },
     { "n", K("<D-e>", "<C-e>"), function() snacks().picker.recent() end, "Recent files" },
     { "n", K("<D-F12>", "<C-F12>"), "<cmd>AerialToggle<cr>", "File structure" },
     -- refactor / edit
-    { "n", "<S-F6>", vim.lsp.buf.rename, "Rename" },
-    { { "n", "x" }, "<A-CR>", vim.lsp.buf.code_action, "Intention / quick fix" },
     {
       "n",
       K("<D-A-l>", "<C-A-l>"),
       function() require("conform").format({ async = true, lsp_format = "fallback" }) end,
       "Reformat code",
-    },
-    {
-      "n",
-      "<C-A-o>",
-      function() vim.lsp.buf.code_action({ context = { only = { "source.organizeImports" } }, apply = true }) end,
-      "Optimize imports",
     },
     { "n", K("<D-d>", "<C-d>"), "yyp", "Duplicate line" },
     -- diagnostics
@@ -118,6 +107,22 @@ return {
       "Tool: version control",
     },
   },
-  lsp = {},
+  lsp = {
+    { "n", K("<D-b>", "<C-b>"), vim.lsp.buf.definition, "Goto definition" },
+    { "n", K("<D-A-b>", "<C-A-b>"), vim.lsp.buf.implementation, "Goto implementation" },
+    { "n", K("<D-S-b>", "<C-S-b>"), vim.lsp.buf.type_definition, "Goto type declaration" },
+    { "n", "<A-F7>", "<cmd>Glance references<cr>", "Find usages" },
+    { "n", "<A-Space>", "<cmd>Glance definitions<cr>", "Quick definition" },
+    { "n", "<F1>", vim.lsp.buf.hover, "Quick doc" },
+    { "n", K("<D-A-o>", "<C-A-S-n>"), function() snacks().picker.lsp_symbols() end, "Go to symbol" },
+    { "n", "<S-F6>", vim.lsp.buf.rename, "Rename" },
+    { { "n", "x" }, "<A-CR>", vim.lsp.buf.code_action, "Intention / quick fix" },
+    {
+      "n",
+      "<C-A-o>",
+      function() vim.lsp.buf.code_action({ context = { only = { "source.organizeImports" } }, apply = true }) end,
+      "Optimize imports",
+    },
+  },
   groups = {},
 }

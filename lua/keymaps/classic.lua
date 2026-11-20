@@ -46,34 +46,16 @@ return {
       "Prev error",
     },
 
-    -- Code (LSP actions not tied to a goto)
-    { "n", "<leader>cr", vim.lsp.buf.rename, "Rename" },
-    { { "n", "x" }, "<leader>ca", vim.lsp.buf.code_action, "Code action" },
+    -- Code: actions that work without a language server. LSP actions and the
+    -- gI/gy/gK aliases live in `lsp` below; gd/gD/grr/K come from base.
     {
       "n",
       "<leader>cf",
       function() require("conform").format({ async = true, lsp_format = "fallback" }) end,
       "Format",
     },
-    {
-      "n",
-      "<leader>co",
-      function() vim.lsp.buf.code_action({ context = { only = { "source.organizeImports" } }, apply = true }) end,
-      "Organize imports",
-    },
     { "n", "<leader>cs", "<cmd>AerialToggle<cr>", "Symbols / outline" },
     { "n", "<leader>cd", vim.diagnostic.open_float, "Line diagnostics" },
-    { "n", "<leader>ci", function() require("snacks").picker.lsp_incoming_calls() end, "Incoming calls" },
-    { "n", "<leader>cO", function() require("snacks").picker.lsp_outgoing_calls() end, "Outgoing calls" },
-
-    -- Goto (vim-native short forms)
-    { "n", "gd", vim.lsp.buf.definition, "Goto definition" },
-    { "n", "gD", vim.lsp.buf.declaration, "Goto declaration" },
-    { "n", "gI", vim.lsp.buf.implementation, "Goto implementation" },
-    { "n", "gy", vim.lsp.buf.type_definition, "Goto type definition" },
-    -- grr, not gr: a bare gr waits timeoutlen for the 0.12 defaults grn/gra/gri/grt/grx.
-    { "n", "grr", "<cmd>Glance references<cr>", "References (peek)" },
-    { "n", "gK", vim.lsp.buf.signature_help, "Signature help" },
 
     -- Git (hunks under <leader>gh, ops under <leader>g)
     { "n", "<leader>ghs", function() require("gitsigns").stage_hunk() end, "Stage hunk" },
@@ -165,17 +147,19 @@ return {
     { "n", "<leader>am", "<cmd>ClaudeCodeSelectModel<cr>", "Select Claude model" },
   },
   lsp = {
-    -- buffer-local, applied on LspAttach (Task 8). Peek references via glance.
+    { { "n", "x" }, "<leader>ca", vim.lsp.buf.code_action, "Code action" },
+    { "n", "<leader>cr", vim.lsp.buf.rename, "Rename" },
     {
       "n",
-      "K",
-      function()
-        -- ufo peek first, fall back to hover
-        local ok = require("ufo").peekFoldedLinesUnderCursor()
-        if not ok then vim.lsp.buf.hover() end
-      end,
-      "Hover / peek fold",
+      "<leader>co",
+      function() vim.lsp.buf.code_action({ context = { only = { "source.organizeImports" } }, apply = true }) end,
+      "Organize imports",
     },
+    { "n", "<leader>ci", function() require("snacks").picker.lsp_incoming_calls() end, "Incoming calls" },
+    { "n", "<leader>cO", function() require("snacks").picker.lsp_outgoing_calls() end, "Outgoing calls" },
+    { "n", "gI", vim.lsp.buf.implementation, "Goto implementation" },
+    { "n", "gy", vim.lsp.buf.type_definition, "Goto type definition" },
+    { "n", "gK", vim.lsp.buf.signature_help, "Signature help" },
   },
   groups = {
     { "<leader>c", group = "code" },

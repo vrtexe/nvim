@@ -1,6 +1,8 @@
 -- Mnemonic leader-tree overlay (spec §6.2). One rule: <leader> + category + verb.
 -- Every action is discoverable by pressing the category prefix (which-key shows
--- the tree). `cr` = references (read-heavy), `cn` = rename.
+-- the tree). Navigation is not in the tree: gd/gD/grr/gri/grt/K come from base
+-- and Neovim's defaults in every mode. The vscode and intellij modes extend this
+-- tree, so it is the shared fallback for chords a terminal cannot send.
 local function snacks() return require("snacks") end
 local function gs() return require("gitsigns") end
 
@@ -8,31 +10,15 @@ return {
   name = "consistent",
   desc = "Mnemonic leader-trees",
   maps = {
-    -- code (<leader>c)
-    { "n", "<leader>cd", vim.lsp.buf.definition, "Definition" },
-    { "n", "<leader>cD", vim.lsp.buf.declaration, "Declaration" },
-    { "n", "<leader>ci", vim.lsp.buf.implementation, "Implementation" },
-    { "n", "<leader>cy", vim.lsp.buf.type_definition, "Type definition" },
-    { "n", "<leader>cr", "<cmd>Glance references<cr>", "References" },
-    { "n", "<leader>cn", vim.lsp.buf.rename, "Rename" },
-    { { "n", "x" }, "<leader>ca", vim.lsp.buf.code_action, "Code action" },
+    -- code (<leader>c): same letters as classic; LSP actions are in `lsp`
     {
       "n",
       "<leader>cf",
       function() require("conform").format({ async = true, lsp_format = "fallback" }) end,
       "Format",
     },
-    {
-      "n",
-      "<leader>co",
-      function() vim.lsp.buf.code_action({ context = { only = { "source.organizeImports" } }, apply = true }) end,
-      "Organize imports",
-    },
-    { "n", "<leader>ck", vim.lsp.buf.hover, "Hover" },
-    { "n", "<leader>cs", function() snacks().picker.lsp_symbols() end, "Symbols / outline" },
-    { "n", "<leader>ce", vim.diagnostic.open_float, "Line diagnostics" },
-    { "n", "<leader>cI", function() snacks().picker.lsp_incoming_calls() end, "Incoming calls" },
-    { "n", "<leader>cO", function() snacks().picker.lsp_outgoing_calls() end, "Outgoing calls" },
+    { "n", "<leader>cs", "<cmd>AerialToggle<cr>", "Symbols / outline" },
+    { "n", "<leader>cd", vim.diagnostic.open_float, "Line diagnostics" },
 
     -- find (<leader>f)
     { "n", "<leader>ff", function() snacks().picker.files() end, "Files" },
@@ -134,7 +120,16 @@ return {
     },
   },
   lsp = {
-    { "n", "K", vim.lsp.buf.hover, "Hover" },
+    { { "n", "x" }, "<leader>ca", vim.lsp.buf.code_action, "Code action" },
+    { "n", "<leader>cr", vim.lsp.buf.rename, "Rename" },
+    {
+      "n",
+      "<leader>co",
+      function() vim.lsp.buf.code_action({ context = { only = { "source.organizeImports" } }, apply = true }) end,
+      "Organize imports",
+    },
+    { "n", "<leader>ci", function() require("snacks").picker.lsp_incoming_calls() end, "Incoming calls" },
+    { "n", "<leader>cO", function() require("snacks").picker.lsp_outgoing_calls() end, "Outgoing calls" },
   },
   groups = {
     { "<leader>c", group = "code" },
