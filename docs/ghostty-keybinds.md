@@ -34,8 +34,9 @@ keybind = cmd+slash=csi:47;9u
 `csi:X` makes Ghostty emit `ESC [ X`. The CSI-u form is `<keycode> ; <modifier> u`,
 where modifier = `1 + shift(1) + alt(2) + ctrl(4) + super/Cmd(8)`. So Cmd+/ =
 `1+8 = 9`; Cmd+Shift+N = `1+1+8 = 10`. (Ghostty normalizes `cmd` to `super`
-internally — both spellings validate.) The nvim side is already wired:
-`<D-N>`/`<D-n>` in `lua/plugins/navigation.lua`, `<D-/>` in `lua/core/keymaps.lua`.
+internally — both spellings validate.) On the nvim side, `<D-/>` is bound in
+`lua/keymaps/base.lua`; the VS Code and IntelliJ modes bind their Cmd chords in
+`lua/keymaps/vscode.lua` and `lua/keymaps/intellij.lua`.
 Validate any config change with `ghostty +show-config`.
 
 > If a chord doesn't trigger after reload, your Ghostty/nvim build may decode the

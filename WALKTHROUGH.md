@@ -1,134 +1,107 @@
-# WALKTHROUGH
+# Walkthrough
 
-An end-to-end tour of this Neovim IDE config, from first launch to committing your work. `<leader>` is **Space**. Every binding below was read directly out of the committed Lua files (`lua/core/keymaps.lua`, `lua/plugins/*.lua`) — nothing here is guessed.
+A tour of this configuration from opening a project to committing the work, using the default `classic` keymap mode. `<leader>` is Space. Every binding below comes from `lua/keymaps/base.lua` (shared by all modes) and `lua/keymaps/classic.lua`; the VS Code and IntelliJ modes replace the IDE-style shortcuts and are listed in [docs/keybindings.md](docs/keybindings.md). Switch modes with `:KeymapMode`.
 
-This config has two homes:
-- **Terminal Neovim** (Ghostty, iTerm, etc.) — the full IDE: 49 plugins, theme, LSP, DAP, git UI, everything below.
-- **VS Code** (via the `vscode-neovim` extension) — a guard in `init.lua` (`if not vim.g.vscode then require("config.lazy") end`) skips *all* plugins here. You only get `core/options.lua` + `core/keymaps.lua`: clipboard, line-move, search-clear. VS Code's own keybindings.json (see `docs/vscode-keybindings.md`) covers the rest in that context.
+Forgot a key? Press `<leader>` and wait: which-key shows every binding under it after 400 ms (`timeoutlen`). `<leader>sk` searches all keymaps.
 
-Everything from here down describes the **terminal** home.
-
----
-
-## Keybinding cheatsheet
+## Cheatsheet
 
 | Key | Action |
 |---|---|
-| `<leader>fr` | Recent files (open a project) |
-| `<leader>ff` | Find files |
-| `<leader><leader>` | Find files ("search everywhere") |
-| `<leader>fg` | Live grep |
-| `<leader>o` | Outline (Aerial) |
-| `<leader>ha` / `<leader>hh` | Harpoon add / menu |
-| `s` | Flash jump (normal/visual/operator) |
-| `<S-l>` / `<S-h>` | Next / prev buffer-tab |
+| `<leader><leader>` | Smart find (files, buffers, recent) |
+| `<leader>ff` / `<leader>fg` / `<leader>fr` | Find files / grep / recent files |
+| `<leader>fb` / `<leader>fp` | Buffers / projects |
 | `<leader>e` | File explorer (Neo-tree) |
-| `Ctrl+Space` | Trigger/show completion + docs |
-| `↑` / `↓` in completion menu | Select prev / next item |
-| `Enter` | Accept completion (else normal Enter) |
-| `Tab` / `Shift+Tab` | Select next / prev item |
-| `Ctrl+N` | Multi-cursor (vim-visual-multi) |
-| `ys`/`cs`/`ds` + motion, `S` (visual) | Surround add / change / delete |
-| `Alt+↑` / `Alt+↓` | Move line/selection up / down |
-| `Ctrl+C` / `Ctrl+V` | System clipboard copy (visual) / paste (insert & visual) |
-| `Ctrl+Alt+L` | Reformat (conform.nvim) |
-| `Alt+Enter` | Code action (quick fix) |
-| `Ctrl+Alt+O` | Organize imports |
-| `gd` / `F4` | Go to definition |
-| `gi` | Go to implementation |
-| `grr` / `Alt+F7` | Find references |
-| `K` | Hover docs |
-| `Shift+F6` | Rename symbol |
-| `<leader>xx` / `<leader>xX` | Problems: all / current buffer |
-| `<leader>tt` / `<leader>tf` / `<leader>ts` | Test nearest / test file / test summary |
-| `<leader>rr` / `<leader>rl` | Run task (build) / task list |
-| `<leader>db` / `<leader>dc` | Toggle breakpoint / continue |
-| `F7` / `F8` / `Shift+F8` | Step into / step over / step out |
-| `Ctrl+\` | Toggle terminal (normal & terminal mode) |
-| `<leader>qs` | Restore last session |
-| `]c` / `[c` | Next / prev git hunk |
-| `<leader>gb` | Blame current line |
-| `<leader>gs` | Stage hunk |
-| `<leader>gg` | LazyGit (stage/commit/push UI) |
-| `<leader>gh` | File history (Diffview) |
-| `Ctrl+L` / `Ctrl+]` / `Ctrl+E` | Copilot: accept / next suggestion / dismiss (insert mode ghost text) |
-| `Esc` | Clear search highlight |
-
-Forgot a key? Press `<leader>` and pause — **which-key** pops up a live menu of everything available from there (it's bound to fire after `timeoutlen = 400`ms).
-
----
+| `<leader>cs` | Symbol outline (Aerial) |
+| `<leader>ha` / `<leader>hh` / `<leader>1`-`4` | Harpoon add / menu / jump to slot |
+| `s` / `S` | Flash jump / Flash treesitter select |
+| `<S-l>` / `<S-h>` | Next / previous buffer |
+| `<leader>bd` / `<leader>bo` | Close buffer / close other buffers |
+| `<C-h>` `<C-j>` `<C-k>` `<C-l>` | Move between windows |
+| `<C-s>` | Save |
+| `gd` / `gD` / `gI` / `gy` | Definition / declaration / implementation / type definition |
+| `grr` | References (Glance peek) |
+| `K` | Hover, or peek a closed fold |
+| `<leader>ca` / `<leader>cr` / `<leader>co` | Code action / rename / organize imports |
+| `<leader>cf` | Format |
+| `<leader>cd` | Line diagnostics |
+| `]d` `[d` / `]e` `[e` / `]w` `[w` | Next / previous diagnostic, error, warning |
+| `<leader>xx` / `<leader>xX` | Problems: project / buffer (Trouble) |
+| `<leader>sr` | Search and replace across the project (grug-far) |
+| `<leader>tt` / `<leader>tf` / `<leader>td` | Test nearest / test file / debug nearest test |
+| `<leader>ts` / `<leader>to` | Test summary / test output |
+| `<leader>rr` / `<leader>rl` | Run task / task list (Overseer) |
+| `<leader>db` / `<leader>dc` | Toggle breakpoint / start or continue debugging |
+| `<leader>dO` / `<leader>di` / `<leader>do` | Step over / into / out |
+| `<C-\>` / `<M-t>` | Toggle terminal / floating terminal |
+| `]h` `[h` | Next / previous git hunk |
+| `<leader>ghs` / `<leader>ghr` / `<leader>ghp` | Stage / reset / preview hunk |
+| `<leader>gg` | LazyGit |
+| `<leader>gF` / `<leader>gd` | File history / diff view (Diffview) |
+| `<leader>ac` / `<leader>as` | Toggle Claude Code / send selection to Claude |
+| `<leader>qs` | Restore the session for this directory |
 
 ## 1. Open a project
 
-Launch `nvim` in a project directory (or bare `nvim`, then pick from the dashboard). If you launched bare, the dashboard (`dashboard-nvim`, "hyper" theme) lists recent projects and recent files — pick one, or press `<leader>fr` any time to open the recent-files picker (snacks.nvim) instead.
+Run `nvim` in a project directory. Bare `nvim` opens the dashboard with recent projects and files. `<leader>fr` opens recent files and `<leader>fp` lists projects at any time.
 
 ## 2. Navigate
 
-- `<leader>ff` — fuzzy find files by name (snacks.picker).
-- `<leader><leader>` — same find-files picker, "search everywhere" muscle memory.
-- `<leader>fg` — live grep across the project.
-- `<leader>o` — toggle the Aerial symbol outline for the current file (functions, classes, etc. — also feeds the winbar breadcrumb via barbecue/navic).
-- `<leader>ha` — Harpoon: mark the current file. `<leader>hh` — open the Harpoon quick-menu to jump between marked files.
-- `s` (normal, visual, or operator-pending) — Flash: type a couple of characters to jump anywhere on screen.
+- `<leader><leader>` is the smart picker: files, open buffers and recent files in one list. `<leader>ff` finds files only, `<leader>fg` greps the project, `<leader>sw` greps the word under the cursor.
+- `<leader>cs` toggles the Aerial outline. The winbar shows the breadcrumb of the current symbol.
+- `<leader>ha` marks the current file in Harpoon, `<leader>hh` opens the list, `<leader>1` to `<leader>4` jump straight to a slot.
+- `s` followed by two characters jumps anywhere on screen (Flash). `S` selects a treesitter node.
+- `]t` `[t` jump between TODO comments, `]r` `[r` between highlighted references of the word under the cursor.
 
-## 3. Buffers, tabs, and the file tree
+## 3. Buffers, windows and the file tree
 
-- `<S-l>` / `<S-h>` — cycle to the next / previous buffer (shown as tabs in the bufferline, complete with LSP diagnostic icons).
-- `<leader>e` — toggle the Neo-tree file explorer sidebar (it follows the current file automatically).
+- `<S-l>` and `<S-h>` cycle through buffers, shown as tabs in the bufferline.
+- `<leader>e` toggles Neo-tree. It follows the current file.
+- `<C-h>` `<C-j>` `<C-k>` `<C-l>` move between windows, also from a terminal. `<leader>wv` and `<leader>ws` split, `<leader>wc` closes, `<leader>wo` closes the others.
 
 ## 4. Edit
 
-- Start typing; `nvim-autopairs` closes brackets/quotes for you.
-- `Ctrl+Space` opens (or shows docs for) the completion menu (blink.cmp), sourced from LSP, paths, snippets, and buffer words. Use `↑`/`↓` or `Tab`/`Shift+Tab` to move the selection, `Enter` to accept.
-- Copilot ghost-text suggestions appear automatically as you type; `Ctrl+L` accepts, `Ctrl+]` cycles to the next suggestion, `Ctrl+E` dismisses.
-- `Ctrl+N` starts vim-visual-multi's multi-cursor mode on the word under the cursor — keep pressing it to add the next matching occurrence, then edit all cursors at once.
-- Surround text objects courtesy of nvim-surround: `ys{motion}{char}` adds a surround (e.g. `ysiw"` to quote a word), `cs{old}{new}` changes one, `ds{char}` deletes one, and `S{char}` wraps a visual selection.
-- `Alt+↑` / `Alt+↓` move the current line (or visual selection) up/down, re-indenting as it goes.
-- `Ctrl+C` (visual) copies to the system clipboard; `Ctrl+V` pastes from it in insert or visual mode — these deliberately don't clobber vim's normal-mode `c`/`v`/`p` motions.
-- Rainbow-delimiters, indent guides, and vim-illuminate light up matching brackets/scopes/word references as you move around — no keys needed, just visual aids.
+- Brackets and quotes close automatically (nvim-autopairs); HTML and JSX tags close too (nvim-ts-autotag).
+- Completion (blink.cmp) opens as you type. `<C-Space>` opens it or toggles the documentation, `Tab` and `S-Tab` or the arrow keys move, `Enter` accepts.
+- `<C-n>` starts multi-cursor on the word under the cursor (vim-visual-multi); press it again to add the next match.
+- Surround (nvim-surround): `ysiw"` quotes a word, `cs"'` changes the quotes, `ds"` deletes them.
+- Text objects from mini.ai: `af` / `if` for a function, `aa` / `ia` for an argument.
+- `<A-Up>` and `<A-Down>` move the line or selection. `gcc` comments a line; `<C-/>` does the same.
+- `<C-c>` in visual mode copies to the system clipboard; `<C-v>` in insert mode pastes from it.
 
-## 5. Reformat and fix diagnostics
+## 5. Format and fix diagnostics
 
-- `Ctrl+Alt+L` (normal or visual) reformats the buffer/selection via conform.nvim — stylua for Lua, prettier/prettierd for JS/TS/web, gofmt, rustfmt, etc. (Format-on-save is intentionally off — this is a deliberate keypress.)
-- Diagnostics show inline (virtual text + gutter signs) as `nvim-lint` and your LSP servers report issues.
-- Put the cursor on a squiggly and press `Alt+Enter` for a code action / quick fix menu; `Ctrl+Alt+O` organizes imports specifically.
-- `gd`/`F4` go to definition, `gi` go to implementation, `grr`/`Alt+F7` find references, `K` shows hover docs, `Shift+F6` renames the symbol project-wide.
-- `<leader>xx` opens the Trouble "Problems" panel for the whole project; `<leader>xX` scopes it to the current buffer.
+- `<leader>cf` formats with conform.nvim: stylua for Lua, prettierd or prettier for JS, TS, Svelte, CSS, HTML and JSON, gofmt for Go, rustfmt for Rust. Format on save is off.
+- Diagnostics from the language servers and nvim-lint appear inline and in the sign column. `]d` `[d` move between them, `<leader>cd` shows the full message.
+- `<leader>ca` opens code actions, `<leader>co` organizes imports, `<leader>cr` renames the symbol everywhere.
+- `gd` goes to the definition, `grr` peeks the references in Glance, `K` shows hover documentation. `<leader>ci` and `<leader>cO` list incoming and outgoing calls.
+- `<leader>xx` opens the Trouble problems panel for the project, `<leader>xX` for the current buffer.
 
-## 6. Run, test, build, debug
+## 6. Run, test and debug
 
-- `<leader>tt` runs the nearest test (neotest, with Jest/Go/Rust adapters wired in); `<leader>tf` runs every test in the current file; `<leader>ts` toggles the test summary/tree panel.
-- `<leader>rr` runs a task via Overseer (build/lint/whatever task you pick); `<leader>rl` opens the task list to watch/rerun past tasks.
-- `<leader>db` toggles a breakpoint on the current line; `<leader>dc` starts/continues a debug session (DAP, via codelldb, delve, java-debug or js-debug-adapter depending on language; JS/TS offers "Launch file", "Attach to process" and "Chrome: localhost:5173 (Vite)", Svelte the Chrome one). The DAP UI opens automatically when a session launches or attaches.
-- While debugging: `F7` steps into, `F8` steps over, `Shift+F8` steps out.
+- `<leader>tt` runs the nearest test with neotest (Jest, Go, Java and Rust adapters), `<leader>tf` the whole file, `<leader>td` the nearest test under the debugger. `]f` `[f` jump between failed tests.
+- `<leader>rr` runs a task with Overseer, `<leader>rl` opens the task list.
+- `<leader>db` sets a breakpoint, `<leader>dc` starts or continues a debug session. Adapters: codelldb (Rust, C), delve (Go), java-debug (Java), js-debug (JS, TS, Svelte). JS and TS offer "Launch file", "Attach to process" and "Chrome: localhost:5173 (Vite)". The DAP UI opens on start; `<leader>du` toggles it.
+- While debugging: `<leader>dO` steps over, `<leader>di` into, `<leader>do` out, `<leader>dt` stops.
 
-## 7. Layout
+## 7. Terminal and sessions
 
-- Split windows the usual vim way (`:split`, `:vsplit`, `Ctrl+w` + direction) — nothing custom is bound here, vanilla vim window management applies.
-- `Ctrl+\` toggles an embedded terminal (horizontal split, works from normal or terminal mode) via toggleterm.
-- `<leader>qs` restores your last session (open buffers/layout) for the current directory, via persistence.nvim — handy after quitting and coming back.
+- `<C-\>` toggles a terminal at the bottom (toggleterm). `<M-t>` opens a floating one, `<M-1>` to `<M-3>` pick a numbered terminal.
+- `<leader>qs` restores the session for the current directory (persistence.nvim), `<leader>ql` the last session.
 
 ## 8. Git
 
-- Gitsigns shows added/changed/removed markers in the gutter and inline current-line blame automatically (no key needed to see it).
-- `]c` / `[c` jump to the next / previous hunk; `<leader>gs` stages the hunk under the cursor; `<leader>gb` shows a full blame popup for the current line.
-- `<leader>gg` opens LazyGit — a full terminal UI for staging, committing, and pushing (requires the `lazygit` binary, see below).
-- `<leader>gh` opens Diffview's file history for the current file, so you can browse and diff past revisions.
+- gitsigns marks changed lines in the sign column. `<leader>gb` toggles inline blame for the current line.
+- `]h` `[h` move between hunks. `<leader>ghs` stages a hunk, `<leader>ghr` resets it, `<leader>ghp` previews it, `<leader>ghb` shows the full blame.
+- `<leader>gg` opens LazyGit to stage, commit and push.
+- `<leader>gF` shows the history of the current file in Diffview, `<leader>gd` the working tree diff. `<leader>gs` and `<leader>gl` pick from git status and git log.
 
-## 9. First-run notes
+## 9. First run
 
-- **Plugins**: on the very first `nvim` launch, lazy.nvim bootstraps itself and installs all 49 plugins automatically. If anything looks incomplete afterward, run `:Lazy sync`.
-- **LSP servers/formatters/linters**: run `:Mason` to open the manager UI and see what's installed. `mason-lspconfig` auto-installs the configured servers (`lua_ls`, `ts_ls`, `svelte`, `tailwindcss`, `html`, `cssls`, `jsonls`, `eslint`, `gopls`, `clangd`, `kotlin_language_server`, `dockerls`, `sqls`, `bashls`, `pyright`; `tailwindcss` only attaches in projects with a Tailwind config or `tailwindcss` in `package.json`) the first time you open a matching filetype — this can take a minute on first use, so don't panic if `gd`/`K` don't respond instantly on a brand new file type.
-- **Copilot**: run `:Copilot auth` once to sign in before ghost-text suggestions start appearing.
-- **External CLIs** (not bundled — install via Homebrew):
-  ```
-  brew install lazygit ripgrep fd stylua
-  ```
-  - `lazygit` powers `<leader>gg`.
-  - `ripgrep` and `fd` make the find/grep pickers (snacks.nvim) fast (and are used by some pickers directly).
-  - `stylua` is the Lua formatter behind `Ctrl+Alt+L` for `.lua` files.
-  - Mason also installs `jdtls`, `java-debug-adapter`, `java-test`, `js-debug-adapter`, `prettierd`, `prettier` and `hadolint` on first start (Node.js must be present for the npm ones).
-  - Rust needs the toolchain component: `rustup component add rust-analyzer`. Java tests need the JUnit runner once: `:NeotestJava setup`.
-  - The config degrades gracefully if any of these are missing — it just won't error, those specific features simply won't work until installed.
-- **Cmd-key IDE shortcuts** (optional, terminal-only): bindings like `Cmd+Shift+N` for file lookup need Ghostty configured to forward the Cmd combo as an escape sequence, *and* the corresponding decode snippet added to `lua/core/keymaps.lua` — see `docs/ghostty-keybinds.md` for both halves. Until you wire that up, the `<leader>`-based equivalents (`<leader>ff`, etc.) always work with zero terminal configuration, so there's no rush.
-- **VS Code users**: if you also use this repo through the `vscode-neovim` extension, see `docs/vscode-keybindings.md` for the IntelliJ-style verb-to-VS Code-command mapping (rename, references, code action, go-to-def, run test) to wire into VS Code's `keybindings.json`.
+- lazy.nvim installs the plugins on first start. Run `:Lazy sync` if something looks incomplete.
+- Mason installs the language servers when a matching file opens: `lua_ls`, `ts_ls`, `svelte`, `tailwindcss`, `html`, `cssls`, `jsonls`, `eslint`, `gopls`, `clangd`, `kotlin_language_server`, `dockerls`, `sqls`, `bashls` and `pyright`. `tailwindcss` attaches only in projects with a Tailwind config or `tailwindcss` in `package.json`. It also installs `jdtls`, `java-debug-adapter`, `java-test`, `js-debug-adapter`, `prettierd`, `prettier`, `hadolint`, `codelldb` and `delve`. Node.js must be on `PATH` for the npm packages. `:Mason` shows what is installed.
+- Rust needs `rustup component add rust-analyzer`. Java tests need the JUnit runner once: `:NeotestJava setup`.
+- External tools: `brew install lazygit ripgrep fd stylua`. Without them the related features do nothing, without errors.
+- Copilot is configured but disabled in `lua/plugins/ai.lua`. To use it, set `enabled = true` there and run `:Copilot auth`.
+- Cmd shortcuts in Ghostty need the terminal to forward them; see [docs/ghostty-keybinds.md](docs/ghostty-keybinds.md).
+- Inside VS Code (vscode-neovim) the plugins and keymap modes do not load; see [docs/vscode-keybindings.md](docs/vscode-keybindings.md).
